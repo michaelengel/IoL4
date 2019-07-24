@@ -1,0 +1,537 @@
+/*   Copyright (c) 2002, Steve Dekorte
+ *   All rights reserved. See _BSDLicense.txt.
+ */
+
+#include "IoBuffer.h"
+#include "IoState.h"
+#include "IoCFunction.h"
+#include "IoObject.h"
+#include "IoNil.h"
+#include "IoNumber.h"
+#include "IoMessage.h"
+#include "IoList.h"
+#include <ctype.h>
+
+#define DATA(self) ((IoBufferData *)self->data)
+
+IoTag *IoBuffer_tag(void *state)
+{
+  IoTag *tag = IoTag_newWithName_("Buffer");
+  tag->state = state;
+  tag->freeFunc = (TagFreeFunc *)IoBuffer_free;
+  tag->cloneFunc = (TagCloneFunc *)IoBuffer_rawClone;
+  tag->compareFunc = (TagCompareFunc *)IoBuffer_compare;
+  tag->markFunc = (TagMarkFunc *)IoBuffer_mark;
+  tag->writeToStoreFunc = (TagWriteToStoreFunc *)IoBuffer_writeToStore_;
+  tag->readFromStoreFunc = (TagReadFromStoreFunc *)IoBuffer_readFromStore_;
+  return tag;
+}
+
+
+void IoBuffer_writeToStore_(IoBuffer *self, IoStoreHandle *sh)
+{
+  IoStoreDatum d = IOSTOREDATUM(&(DATA(self)->byteArray->bytes), DATA(self)->byteArray->length);
+  sh->onObject_setData_(sh, d);
+}
+
+void *IoBuffer_readFromStore_(IoBuffer *self, IoStoreHandle *sh)
+{
+  IoStoreDatum d = sh->onObject_getData(sh, self);
+  ByteArray_setData_length_(DATA(self)->byteArray, d.data, d.size);
+  return self;
+}
+
+IoBuffer *IoBuffer_proto(void *state)
+{
+  IoObject *self = IoObject_new(state);
+
+  self->data = calloc(1, sizeof(IoBufferData));
+  self->tag = IoBuffer_tag(state);
+  DATA(self)->byteArray = ByteArray_new();
+  DATA(self)->byteCache = IONUMBER(0);
+  IoState_registerProtoWithFunc_(state, self, IoBuffer_proto);
+    
+  /* output */
+  IoObject_addMethod_(self, IOSTRING("print"), IoBuffer_print);
+
+  /* accessors */
+  IoObject_addMethod_(self, IOSTRING("at"), IoBuffer_at_);
+  IoObject_addMethod_(self, IOSTRING("find"), IoBuffer_find_from_);
+  IoObject_addMethod_(self, IOSTRING("length"), IoBuffer_length);
+  IoObject_addMethod_(self, IOSTRING("setLength"), IoBuffer_setLength);
+  
+  IoObject_addMethod_(self, IOSTRING("asNumber"), IoBuffer_asNumber);
+  IoObject_addMethod_(self, IOSTRING("asString"), IoBuffer_asString);
+  IoObject_addMethod_(self, IOSTRING("asBinaryNumber"), IoBuffer_asBinaryNumber);
+  
+  /* modifiers */
+  IoObject_addMethod_(self, IOSTRING("empty"), IoBuffer_clear);
+  IoObject_addMethod_(self, IOSTRING("append"), IoBuffer_append_);
+  IoObject_addMethod_(self, IOSTRING("appendByte"), IoBuffer_appendByte_);
+  IoObject_addMethod_(self, IOSTRING(".."), IoBuffer_append_);
+  IoObject_addMethod_(self, IOSTRING("insert"), IoBuffer_insert_at_);
+  IoObject_addMethod_(self, IOSTRING("sizeTo"), IoBuffer_sizeTo_);
+  IoObject_addMethod_(self, IOSTRING("removeFromTo"), IoBuffer_removeFrom_to_);
+  IoObject_addMethod_(self, IOSTRING("replace"), IoBuffer_replace_with_);
+  IoObject_addMethod_(self, IOSTRING("fromTo"), IoBuffer_from_to_);
+  IoObject_addMethod_(self, IOSTRING("between"), IoBuffer_between);
+  IoObject_addMethod_(self, IOSTRING("atPut"), IoBuffer_at_put_);
+  IoObject_addMethod_(self, IOSTRING("lower"), IoBuffer_lower);
+  IoObject_addMethod_(self, IOSTRING("upper"), IoBuffer_upper);  
+  
+  IoObject_addMethod_(self, IOSTRING("join"), IoBuffer_join);
+  IoObject_addMethod_(self, IOSTRING("split"), IoBuffer_split);
+  IoObject_addMethod_(self, IOSTRING("splitCount"), IoBuffer_splitCount);
+  
+  /* loops */
+  IoObject_addMethod_(self, IOSTRING("foreach"), IoString_foreach);
+  return self;
+}
+
+IoBuffer *IoBuffer_rawClone(IoBuffer *self)
+{
+  IoBuffer *child = IoObject_rawClonePrimitive(self);
+  child->data = cpalloc(DATA(self), sizeof(IoBufferData));
+  DATA(child)->byteArray = ByteArray_clone(DATA(self)->byteArray);
+  DATA(child)->byteCache = IONUMBER(0);
+  return child;
+}
+
+/* ----------------------------------------------------------- */
+
+IoBuffer *IoBuffer_new(void *state)
+{
+  IoBuffer *proto = IoState_protoWithInitFunction_(state, IoBuffer_proto);
+  return IoBuffer_rawClone(proto);
+}
+
+IoBuffer *IoBuffer_newWithData_length_(void *state, unsigned char *s, int length)
+{
+  IoBuffer *self = IoBuffer_new(state);
+  ByteArray_setData_length_(DATA(self)->byteArray, s, length);
+  return self;
+}
+
+IoBuffer *IoBuffer_newWithCString_(void *state, char *s)
+{ return IoBuffer_newWithData_length_(state, s, strlen(s)); }
+
+IoBuffer *IoBuffer_newWithCString_length_(void *state, char *s, int length)
+{ return IoBuffer_newWithData_length_(state, s, length); }
+
+IoBuffer *IoBuffer_newWithByteArray_copy_(void *state, ByteArray *ba, int copy)
+{
+  IoBuffer *self = IoBuffer_new(state);
+  if (copy)
+  { ByteArray_copy_(DATA(self)->byteArray, ba); }
+  else
+  {
+    ByteArray_free(DATA(self)->byteArray);
+    DATA(self)->byteArray = ba;
+  }
+  return self;
+}
+
+IoBuffer *IoBuffer_newFromFilePath_(void *state, char *path)
+{
+  IoBuffer *self = IoBuffer_new(state);
+  ByteArray_readFromFilePath_(DATA(self)->byteArray, path);
+  return self;
+}
+
+IoBuffer *IoBuffer_newCopy(IoBuffer *self)
+{ return IoBuffer_newWithCString_(IOSTATE, DATA(self)->byteArray->bytes); }
+
+void IoBuffer_mark(IoBuffer *self) 
+{ IoObject_makeGrayIfWhite((IoObject *)(DATA(self)->byteCache)); }
+
+void IoBuffer_free(IoBuffer *self) 
+{ 
+  ByteArray_free(DATA(self)->byteArray);
+}
+
+int IoBuffer_compare(IoBuffer *self, IoBuffer *v) 
+{ 
+  if (ISSTRING(v) || ISBUFFER(v)) 
+  { return ByteArray_compare_(DATA(self)->byteArray, DATA(v)->byteArray); }
+  return ((ptrdiff_t)self->tag) - ((ptrdiff_t)v->tag);
+}
+
+ByteArray *IoBuffer_rawByteArray(IoBuffer *self)
+{ return DATA(self)->byteArray; }
+
+char *IoBuffer_asCString(IoBuffer *self) 
+{ return (char *)(DATA(self)->byteArray->bytes); }
+
+unsigned char *IoBuffer_bytes(IoBuffer *self)
+{ return (unsigned char *)(DATA(self)->byteArray->bytes); }
+
+size_t IoBuffer_rawLength(IoBuffer *self)
+{ return (size_t)(ByteArray_length(DATA(self)->byteArray)); }
+
+double IoBuffer_asDouble(IoBuffer *self)
+{ return strtod(DATA(self)->byteArray->bytes, NULL); }
+
+int IoBuffer_equalsCBuffer_(IoBuffer *self, char *s) 
+{ return (strcmp(DATA(self)->byteArray->bytes, s) == 0); }
+
+/* ----------------------------------------------------------- */
+IoBuffer *IoBuffer_quoted(IoBuffer *self)
+{ ByteArray_quote(DATA(self)->byteArray); return self; }
+
+IoBuffer *IoBuffer_unquoted(IoBuffer *self)
+{ ByteArray_unquote(DATA(self)->byteArray); return self; }
+
+IoBuffer *IoBuffer_escape(IoBuffer *self)
+{ ByteArray_escape(DATA(self)->byteArray); return self; }
+
+IoBuffer *IoBuffer_unescape(IoBuffer *self)
+{ ByteArray_unescape(DATA(self)->byteArray); return self; }
+
+/* ----------------------------------------------------------- */
+
+IoObject *IoBuffer_append_(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  int i;
+  for (i=0; i < IoMessage_argCount(m); i++)
+  {
+  IoObject *other = IoMessage_locals_valueArgAt_(m, locals, i);
+  if (ISNUMBER(other)) 
+  { 
+    double d = IoNumber_asDouble(other);
+    char s[24];
+    memset(s, 0x0, 24);
+    if (d == (long)d)
+    { sprintf(s, "%d", (int)d); }
+    else
+    { sprintf(s, "%f", d); }
+    ByteArray_appendCString_(DATA(self)->byteArray, s);
+  }
+  else if (ISSTRING(other) || ISBUFFER(other))
+  { ByteArray_append_(DATA(self)->byteArray, DATA(other)->byteArray); }
+  else  
+  {
+    IoState_error_description_(IOSTATE, m, 
+      "Io.Buffer.invalidArgument",
+      "argument 0 to method '%s' must be a number, string or buffer, not a '%s'",
+      CSTRING(IoMessage_rawMethod(m)), IoObject_name(other));
+  }
+  }
+  return self;
+}
+
+IoObject *IoBuffer_appendByte_(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  int i;
+  for (i=0; i < IoMessage_argCount(m); i++)
+  {
+    unsigned char s = (unsigned char)IoMessage_locals_intArgAt_(m, locals, i);
+    ByteArray_appendBytes_length_(DATA(self)->byteArray, &s, 1);
+  }
+  return self;
+}
+
+IoObject *IoBuffer_insert_at_(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  IoBuffer *otherBuffer = IoMessage_locals_stringOrBufferArgAt_(m, locals, 0);
+  int n = IoMessage_locals_intArgAt_(m, locals, 1);
+  ByteArray_insert_at_(DATA(self)->byteArray, DATA(otherBuffer)->byteArray, n);
+  return self;
+}
+
+IoObject *IoBuffer_removeFrom_to_(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  int start = IoMessage_locals_intArgAt_(m, locals, 0);
+  int end   = IoMessage_locals_intArgAt_(m, locals, 1);
+  ByteArray_removeFrom_to_(DATA(self)->byteArray, start, end);
+  return self;
+}
+
+IoObject *IoBuffer_print(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  IoState_justPrint_(IOSTATE, ByteArray_asCString(DATA(self)->byteArray));
+  return self;
+}
+
+IoObject *IoBuffer_length(IoBuffer *self, IoObject *locals, IoMessage *m)
+{ 
+  IoNumber_rawSet(DATA(self)->byteCache, (double)DATA(self)->byteArray->length);
+  return DATA(self)->byteCache; 
+}
+
+IoObject *IoBuffer_setLength(IoBuffer *self, IoObject *locals, IoMessage *m)
+{ 
+  int len = IoMessage_locals_intArgAt_(m, locals, 0);
+  ByteArray_setLength_(DATA(self)->byteArray, len);
+  return self;
+}
+
+IoObject *IoBuffer_sizeTo_(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  int newSize = IoMessage_locals_intArgAt_(m, locals, 0);
+  ByteArray_sizeTo_(DATA(self)->byteArray, newSize);
+  return self;
+}
+
+IoObject *IoBuffer_replace_with_(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  IoBuffer *subBuffer = IoMessage_locals_stringOrBufferArgAt_(m, locals, 0);
+  IoBuffer *otherBuffer = IoMessage_locals_stringOrBufferArgAt_(m, locals, 1);
+  ByteArray_replace_with_(DATA(self)->byteArray, 
+    DATA(subBuffer)->byteArray, DATA(otherBuffer)->byteArray);
+  return self;
+}
+
+IoObject *IoBuffer_at_(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  int i = IoMessage_locals_intArgAt_(m, locals, 0);
+  int l = 1;
+  int n;
+  long d = 0;
+
+  if (IoMessage_argCount(m) == 2)
+  {
+    l = IoMessage_locals_intArgAt_(m, locals, 1);
+    IOASSERT(l <= (int)sizeof(long), "length larger than number");
+  }
+  if (!((i >= 0) && (i+l <= ByteArray_length(DATA(self)->byteArray))))
+  { return IONIL(self); }
+
+  IOASSERT((i >= 0) && (i+l <= ByteArray_length(DATA(self)->byteArray)),
+    "range out of buffer bounds");
+
+  for (n=i+l-1; n>=i; n--)
+  {
+    d = d << 8;
+    d = d | (DATA(self)->byteArray->bytes[n]);
+  }
+  IoNumber_rawSet(DATA(self)->byteCache, d);
+  return DATA(self)->byteCache;
+}
+
+IoObject *IoBuffer_at_put_(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  int i = IoMessage_locals_intArgAt_(m, locals, 0);
+  int v = IoMessage_locals_intArgAt_(m, locals, 1);
+  ByteArray_at_put_(DATA(self)->byteArray, (int)i, (unsigned char)v);
+  return self;
+}
+
+IoObject *IoBuffer_from_to_(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  int fromIndex = IoMessage_locals_intArgAt_(m, locals, 0);
+  int toIndex   = IoMessage_locals_intArgAt_(m, locals, 1);
+  ByteArray *ba = ByteArray_newWithBytesFrom_to_(DATA(self)->byteArray, fromIndex, toIndex);
+  return IoBuffer_newWithByteArray_copy_(IOSTATE, ba, 0);
+}
+
+IoObject *IoBuffer_between(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  int start = 0;
+  int end = 0;
+  IoString *fromString, *toString;
+  
+  fromString = (IoString *)IoMessage_locals_valueArgAt_(m, locals, 0);
+  if (ISSTRING(fromString)||ISBUFFER(fromString))
+  {
+    start = ByteArray_find_from_(DATA(self)->byteArray, DATA(fromString)->byteArray, 0) + 
+      IoBuffer_rawLength(fromString);
+    if (start == -1) start = 0;
+  }
+  else if (ISNIL(fromString)) 
+  { start = 0; }
+  else
+  {
+    IoState_error_description_(IOSTATE, m, "Buffer.between", 
+      "Nil, String or Buffer argument required for arg 0, not a %s", IoObject_name((IoObject *)fromString));
+  }
+  
+  toString   = (IoString *)IoMessage_locals_valueArgAt_(m, locals, 1);
+  if (ISSTRING(toString)||ISBUFFER(toString))
+  {
+    end   = ByteArray_find_from_(DATA(self)->byteArray, DATA(toString)->byteArray, start) -1;
+    if (end == -1) start = ByteArray_length(DATA(self)->byteArray);
+  }
+  else if (ISNIL(toString))
+  { end = ByteArray_length(DATA(self)->byteArray); }
+  else
+  {
+    IoState_error_description_(IOSTATE, m, "Buffer.between", 
+      "Nil, String or Buffer argument required for arg 1, not a %s", IoObject_name((IoObject *)toString));
+  }  
+  
+  {
+  ByteArray *ba = ByteArray_newWithBytesFrom_to_(DATA(self)->byteArray, start, end);
+  IoBuffer *result = IoBuffer_newWithByteArray_copy_(IOSTATE, ba, 0);
+  return result;
+  }
+}
+
+IoObject *IoBuffer_find_from_(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  IoBuffer *otherBuffer = IoMessage_locals_stringOrBufferArgAt_(m, locals, 0);
+  int f = 0;
+  int index;
+  if (IoMessage_argCount(m) > 1)
+  { f = IoMessage_locals_intArgAt_(m, locals, 1); }
+  index = ByteArray_find_from_(DATA(self)->byteArray, DATA(otherBuffer)->byteArray, f);
+  if (index == -1) return IONIL(self);
+  IoNumber_rawSet(DATA(self)->byteCache, index);
+  return DATA(self)->byteCache;
+}
+
+IoObject *IoBuffer_lower(IoBuffer *self, IoObject *locals, IoMessage *m)
+{ ByteArray_lower(DATA(self)->byteArray); return self; }
+
+IoObject *IoBuffer_upper(IoBuffer *self, IoObject *locals, IoMessage *m)
+{ ByteArray_upper(DATA(self)->byteArray); return self; }
+
+IoObject *IoBuffer_asNumber(IoBuffer *self, IoObject *locals, IoMessage *m)
+{ 
+  IoNumber_rawSet(DATA(self)->byteCache, IoBuffer_asDouble(self));
+  return DATA(self)->byteCache; 
+}
+
+IoObject *IoBuffer_join(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  IoList *ioBuffers = (IoList *)IoMessage_locals_valueArgAt_(m, locals, 0);
+  IOASSERT(ISLIST(ioBuffers), "Buffer join() requires a list argument");
+  {
+    List *buffers = IoList_rawList(ioBuffers);
+    int i;
+    int size = 0;
+    for (i=0; i< List_count(buffers); i++)
+    {
+      IoBuffer *buffer = LIST_AT_(buffers, i);
+      IOASSERT(ISSTRING(buffer), "Buffer join() requires all elements of it's list argument to be buffers");
+      size += ByteArray_length(DATA(buffer)->byteArray);
+    }
+    
+    ByteArray_sizeTo_(DATA(self)->byteArray, size);
+    for (i=0; i< List_count(buffers); i++)
+    {
+      IoBuffer *buffer = LIST_AT_(buffers, i);
+      ByteArray_append_(DATA(self)->byteArray, DATA(buffer)->byteArray);
+    }
+    return self;
+  }
+}
+
+IoObject *IoBuffer_splitCount(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  int splitCount = 0;
+  IOASSERT(IoMessage_argCount(m), "Buffer splitCount() requires an argument");
+  {
+    List *buffers = List_new();
+    int i, n;
+    int argn = 0;
+    IoObject *arg = IoMessage_locals_valueArgAt_(m, locals, argn);
+    while (arg && !ISNIL(arg))
+    {
+      if (!ISSTRING(arg) && !ISBUFFER(arg))
+      {
+        List_free(buffers);
+        IoState_error_description_(IOSTATE, m, "Buffer.splitCount.invalidArgument", 
+          "Buffer splitCount() only takes buffers arguments, not %ss", IoObject_name(arg));
+      }
+      List_add_(buffers, arg);
+      argn++;
+      arg = IoMessage_locals_valueArgAt_(m, locals, argn);
+    }
+    IOASSERT(List_count(buffers), "Buffer split() requires a non Nil argument");
+    
+    for (n=0; n < DATA(self)->byteArray->length; n++)
+    {
+      int minNext = DATA(self)->byteArray->length + 1;
+      for (i=0; i < List_count(buffers); i++)
+      {
+        IoBuffer *buffer = LIST_AT_(buffers, i);
+        int next = strcspn(DATA(self)->byteArray->bytes + n, DATA(buffer)->byteArray->bytes);
+        if (next < minNext) { minNext = next; }
+      }
+      if (minNext)
+      {
+        splitCount++;
+        n += minNext;
+      }
+      
+    }
+    List_free(buffers);
+  }
+  IoNumber_rawSet(DATA(self)->byteCache, splitCount);
+  return DATA(self)->byteCache;
+}
+
+IoObject *IoBuffer_split(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  IoList *splitBuffers = IoList_new(IOSTATE);
+  List *splitBuffersList = IoList_rawList(splitBuffers);
+  IOASSERT(IoMessage_argCount(m), "Buffer split() requires an argument");
+  {
+    List *buffers = List_new();
+    int i, n;
+    int argn = 0;
+    IoObject *arg = IoMessage_locals_valueArgAt_(m, locals, argn);
+    while (arg && !ISNIL(arg))
+    {
+      if (!ISSTRING(arg) && !ISBUFFER(arg))
+      {
+        List_free(buffers);
+        IoState_error_description_(IOSTATE, m, "Buffer.split.invalidArgument", 
+          "Buffer split() only takes buffers arguments, not %ss", IoObject_name(arg));
+      }
+      List_add_(buffers, arg);
+      argn++;
+      arg = IoMessage_locals_valueArgAt_(m, locals, argn);
+    }
+    IOASSERT(List_count(buffers), "Buffer split() requires a non Nil argument");
+    
+    for (n=0; n < DATA(self)->byteArray->length; n++)
+    {
+      int minNext = DATA(self)->byteArray->length + 1;
+      for (i=0; i < List_count(buffers); i++)
+      {
+        IoBuffer *buffer = LIST_AT_(buffers, i);
+        int next = strcspn(DATA(self)->byteArray->bytes + n, DATA(buffer)->byteArray->bytes);
+        if (next < minNext) { minNext = next; }
+      }
+      if (minNext)
+      {
+        IoBuffer *newBuffer = IoBuffer_newWithCString_length_(IOSTATE, 
+            DATA(self)->byteArray->bytes + n, minNext);
+        List_add_(splitBuffersList, newBuffer);
+        n += minNext;
+      }
+      
+    }
+    List_free(buffers);
+  }
+  return splitBuffers;
+}
+
+IoObject *IoBuffer_asBinaryNumber(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  IoNumber *byteCount = IoMessage_locals_valueArgAt_(m, locals, 0);
+  int max = ByteArray_length(DATA(self)->byteArray);
+  int bc = sizeof(double);
+  double d = 0;
+  if (!ISNIL(byteCount)) bc = IoNumber_asInt(byteCount);
+  if (max < bc )
+  {
+    IoState_error_description_(IOSTATE, m, "Buffer.asBinaryNumber", 
+      "requested first %i bytes, but Buffer only contians %i bytes", bc, max);
+  }
+  memcpy(&d, DATA(self)->byteArray->bytes, bc);
+  return IONUMBER(d);
+}
+
+IoObject *IoBuffer_asString(IoBuffer *self, IoObject *locals, IoMessage *m)
+{
+  return IoState_stringWithByteArray_copy_(IOSTATE, DATA(self)->byteArray, 1); 
+}
+
+IoObject *IoBuffer_clear(IoBuffer *self, IoObject *locals, IoMessage *m)
+{ 
+  ByteArray_clear(DATA(self)->byteArray);
+  ByteArray_setLength_(DATA(self)->byteArray, 0);
+  return self;
+}

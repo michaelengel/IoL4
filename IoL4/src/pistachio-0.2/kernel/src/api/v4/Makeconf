@@ -1,0 +1,18 @@
+SOURCES += $(addprefix src/api/v4/, exregs.cc ipc.cc ipcx.cc kernelinterface.cc thread.cc schedule.cc space.cc interrupt.cc smp.cc processor.cc)
+
+
+VERSIONFILE=$(BUILDDIR)/.version
+
+$(VERSIONFILE): phony
+	@if [ ! -f $(VERSIONFILE) ]; \
+	then echo 1 > $(VERSIONFILE); \
+	else expr `cat $(VERSIONFILE)` + 1 > $(VERSIONFILE); \
+	fi
+
+src/api/v4/kernelinterface.o: $(VERSIONFILE)
+
+CFLAGS_src/api/v4/kernelinterface = '-DKERNELGENDATE=\
+   SHUFFLE3('`date "+day:(1%d-100),month:(1%m-100),year:(%Y-2000)"`')' \
+   '-D__USER__="$(USER)@'`hostname`'"' \
+   '-D__GCCVERSION__="$(shell $(CC) -v 2>&1 | tail -1)"' \
+   '-D__KERNELBUILDNO__=$(shell cat $(VERSIONFILE))'

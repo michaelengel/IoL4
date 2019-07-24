@@ -1,0 +1,218 @@
+<HTML>
+<HEAD>
+<TITLE>Buffer</TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+A {text-decoration: none}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>Buffer</H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<A NAME="Summary"></A>
+<h2>Summary</h2>
+<ul>
+A Buffer is a container for a byte array similar to a String. A Buffer is different in that it can be modified while Strings are immutable. Operations on Buffers are done in-place, without creating new objects. This can be much faster than manipulating byte arrays with strings.
+<p>
+Like Strings, Buffer methods that take index number arguments will treat negative indexes as the Buffer length + the negative index. For example, the method from_to_(-1,-1) would return a Buffer containing the last character of the receiver.
+</UL>
+
+<A NAME="Methods"></A>
+<h2>Methods</h2>
+<UL>
+
+<b>clone</b>
+<p>
+Returns a copy of the receiver.
+<br><br><br>
+
+
+<b>type</b>
+<p>
+Returns a Buffer with the value "Buffer".
+<br><br><br>
+
+</UL>
+<h3>Comparison</h3>
+<UL>
+<BR>
+
+<b>==(aBufferOrString)</b>
+<p>
+Returns self if the byte array in aBuffer is equal to that of the receiver, otherwise returns nil.
+<br><br><br>
+
+</UL>
+<h3>Output</h3>
+<UL>
+<BR>
+
+<b>print</b>
+<p>
+Prints the content of the Buffer to standard output.
+<br><br><br>
+
+
+</UL>
+<h3>Accessors</h3>
+<UL>
+<BR>
+
+<b>asString</b>
+<p>
+Returns the receiver converted to a String.
+<p>
+
+
+<b>at(aNumber)</b>
+<p>
+Returns a number with the byte value at the index specified by aNumber. The byte value will be 0x0 if the index is out of bounds.  
+<br><br><br>
+
+<b>length</b>
+<p>
+Returns a number with the length of the receiver.
+<br><br><br>
+
+<b>fromTo(startIndex, endIndex)</b>
+<p>
+Returns a new Buffer containing a copy of the bytes of the receiver from the startIndex to the endIndex.
+<br><br><br>
+
+<b>find(aBuffer, optionalStartIndex)</b>
+<p>
+Returns a number with the first occurrence of aBuffer in the receiver after the startIndex. If no startIndex is specified, the search starts at the beginning of the buffer. Nil is returned if no occurances are found. 
+<br><br><br>
+
+<b>byteAt(indexNumber)</b>
+<p>
+Returns a number with the byte representation(0-25) of the character at indexNumber of the receiver. Returns Nil if the index is invalid.
+<br><br><br>
+
+
+
+</UL>
+<h3>Modifiers</h3>
+<UL>
+<BR>
+
+<b>sizeTo(aNumber)</b>
+<p>
+If needed, resize the memory alloced for the receivers byte array to be large enough to fit the number of bytes specified by aNumber. This operation will not change the Buffer's length or contents.
+<p>
+
+<b>empty</b>
+<p>
+Empty the ByteArray.
+<p>
+
+<b>atPut(aNumberIndex, aNumberByte)</b>
+<p>
+Sets the byte at the index specified by aNumberIndex to the byte value of aNumberByte. Returns self.  
+<br><br><br>
+
+<b>append(aBufferOrString1, aBufferOrString2, ...)</b>
+<p>
+Appends aBufferOrString arguments to the receiver. Returns self.  
+<br><br><br>
+
+<b>.. aBufferOrString </b>
+<p>
+Same as append(aBufferOrString) with a single argument.  
+<br><br><br>
+
+<b>prepend(aBufferOrString)</b>
+<p>
+Returns a new Buffer with aBuffer prepended to the receiver.  
+<br><br><br>
+
+
+<b>insertAt(aBufferOrString, indexNumber)</b>
+<p>
+Returns a new Buffer with aBuffer inserted at indexNumber in the receiver. 
+<br><br><br>
+
+
+<b>removeFromTo(startIndex, endIndex)</b>
+<p>
+Returns a new Buffer that is a copy of the receiver with the subBuffer from startIndex to endIndex removed.
+<br><br><br>
+
+<b>replace(aBufferOrString, anotherBufferOrString)</b>
+<p>
+Returns a new Buffer with all occurances of aBuffer replaced with anotherBuffer in the receiver.
+<br><br><br>
+
+<b>join(aList)</b>
+<p>
+Joins a list of strings or buffers and returns a single buffer result. Example:
+<PRE>
+aList = List clone add("a", "b", "c")
+result = Buffer join(aList)
+</PRE>
+<br><br><br>
+
+<b>split(aStringOrBuffer1, aStringOrBuffer2, ...)</b>
+<p>
+Returns a List of strings of the receiver split by aStringOrBuffer1, aStringOrBuffer2, etc. Example:
+
+<PRE>  "this is a \ttest" asbuffer split(" ", "\t")</PRE>
+
+would return a list containing the buffers:
+
+<PRE>  "this", "is", "a", "test"</PRE>
+<p>
+
+<b>splitCount(aStringOrBuffer1, aStringOrBuffer2, ...)</b>
+<p>
+Same as split method but returns the number of results instead of a List of Buffers. If you only need the count, this method is much faster than split().
+<br><br><br>
+
+<b>lower</b>
+<p>
+Returns a copy of the receiver with all characters made lowercase. 
+<br><br><br>
+
+<b>upper</b>
+<p>
+Returns a copy of the receiver with all characters made uppercase. 
+<br><br><br>
+
+
+
+</UL>
+<h3>Loops</h3>
+<UL>
+<BR>
+
+<b>foreach(&lt;indexSlot&gt;, &lt;valueSlot&gt;, &lt;aMessage&gt;)</b>
+<p>
+For each character, set indexSlot to the index of the byte and valueSlot to the number containing the byte value and execute aMessage.<BR> Example usage:
+
+<PRE>  aBuffer foreach(i, v, 
+    write("byte at ", i, " is ", v, "\n")
+  )</PRE>
+
+Example use with a block:
+
+<PRE>  myBlock = block(v, write(v, "\n")) 
+  aBuffer foreach(i, v, myBlock(v))</PRE>
+<br><br><br>
+
+
+
+</UL>
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+</html>

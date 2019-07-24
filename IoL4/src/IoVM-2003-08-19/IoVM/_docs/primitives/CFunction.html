@@ -1,0 +1,51 @@
+<HTML>
+<HEAD>
+<TITLE>CFunction</TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+A {text-decoration: none}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>CFunction</H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<A NAME="Summary"></A>
+<h2>Summary</h2>
+<ul>
+A container for a pointer to a C function binding. They can only be defined from the C side. They act like blocks in that when placed in a slot, they are called when the slot is activated. The "for", "if" "while" and "clone" methods of the Lobby are examples of CFunctions. CFunctions are useful for implementing methods that require the speed of C or binding to a C library.
+
+</UL>
+
+<A NAME="Methods"></A>
+<h2>Methods</h2>
+<UL>
+
+<br>
+
+<b>type</b><p>
+Returns the string "CFunction".
+<br><br><br>
+
+<b>id</b><p>
+Returns a number containing a unique identifier for this CFunction. This is constant during the lifetime of the program, but may not be same between different runs of the same program. 
+<br><br><br>
+
+<b>==(aFunction)</b><p>
+Returns self if aFunction is a CFunction and its function pointer is equal to that of the receiver. Otherwise returns Nil. 
+<br><br><br>
+
+</UL>
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+</html>

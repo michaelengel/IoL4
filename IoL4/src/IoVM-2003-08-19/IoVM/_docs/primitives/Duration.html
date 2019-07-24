@@ -1,0 +1,180 @@
+<HTML>
+<HEAD>
+<TITLE>Duration</TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+A {text-decoration: none}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>Duration</H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<A NAME="Summary"></A>
+<h2>Summary</h2>
+<ul>
+A container for a duration of time.
+<P>
+</UL>
+
+<A NAME="Methods"></A>
+<h2>Methods</h2>
+<UL>
+<br>
+
+<b>type</b>
+<p>
+Returns the string "Duration".
+<br><br><br>
+
+<b>clone</b>
+<p>
+Returns a copy of the receiver.
+<br><br><br>
+
+</UL>
+<h3>Comparison</h3>
+<UL>
+<br>
+
+<b>&lt;, &gt;, ==, !=</b>
+<p>
+All of the standard comparision methods are supported and take a Duration argument. 
+<br><br><br>
+
+</UL>
+<h3>Standard methods</h3>
+<UL>
+<br>
+
+
+<b>years</b>
+<p>
+Returns a number containing the year of the receiver.
+<br><br><br>
+
+<b>setYears(aNumber)</b>
+<p>
+Sets the year of the receiver.
+<br><br><br>
+
+
+<b>days</b>
+<p>
+Returns a number containing the day of the month of the receiver.
+<br><br><br>
+
+<b>setDays(aNumber)</b>
+<p>
+Sets the day of the receiver.
+<br><br><br>
+
+<b>hours</b>
+<p>
+Returns a number containing the hour of the day(0-23) of the receiver.
+<br><br><br>
+
+<b>setHours(aNumber)</b>
+<p>
+Sets the hour of the receiver.
+<br><br><br>
+
+<b>minutes</b>
+<p>
+Returns a number containing the minute of the hour(0-59) of the receiver.
+<br><br><br>
+
+<b>setMinutes(aNumber)</b>
+<p>
+Sets the minute of the receiver.
+<br><br><br>
+
+<b>seconds</b>
+<p>
+Returns a number containing the seconds of the minute(0-59) of the receiver. This number may contain fractions of seconds.
+<br><br><br>
+
+<b>setSeconds(aNumber)</b>
+<p>
+Sets the second of the receiver.
+<br><br><br>
+
+</UL>
+<h3>Conversion To</h3>
+<UL>
+<br>
+
+<b>asString(formatString)</b>
+<p>
+Returns a string representation of the receiver. The formatString argument is optional. If present, the returned string will be formatted according to ANSI C date formating rules.
+<p>
+<PRE>
+%a abbreviated weekday name (Sun, Mon, etc.)
+%A full weekday name (Sunday, Monday, etc.) 
+%b abbreviated month name (Jan, Feb, etc.) 
+%B full month name (January, February, etc.) 
+%c full date and time string 
+%d day of the month as two-digit decimal integer (01-31) 
+%H hour as two-digit 24-hour clock decimal integer (00-23) 
+%I hour as two-digit 12-hour clock decimal integer (01-12) 
+%m month as a two-digit decimal integer (01-12)
+%M minute as a two-digit decimal integer (00-59) 
+%p either "AM" or "PM" 
+%S second as a two-digit decimal integer (00-59) 
+%U number of week in the year as two-digit decimal integer (00-52) with Sunday considered as first day of the week 
+%w weekday as one-digit decimal integer (0-6) with Sunday as 0 
+%W number of week in the year as two-digit decimal integer (00-52) with Monday considered as first day of the week 
+%x full date string (no time); in the C locale, this is equivalent to "%m/%d/%y". 
+%X full time string (no date); in the C locale, this is equivalent to "%H:%M:%S". 
+%y year without century as two-digit decimal number (00-99) 
+%Y year with century as four-digit decimal number 
+%Z time zone name (e.g. EST); null string if no time zone can be obtained 
+%% stands for '%' character in output string. 
+</PRE>
+<p>
+The default format is "%Y-%m-%d %H:%M:%S %Z".
+<br><br><br>
+
+<b>asNumber</b>
+<p>
+Returns a number representation of the receiver. (where 1 is equal to one second)
+<br><br><br>
+
+</UL>
+<h3>Conversion From</h3>
+<UL>
+<br>
+
+<b>fromNumber(aNumber)</b>
+<p>
+Sets the receiver to the Duration specified by aNumber(same format number as returned by Duration asNumber). Returns self.
+<br><br><br>
+
+
+</UL>
+<h3>Math</h3>
+<UL>
+<br>
+
+<b>+= aDuration</b>
+<p>
+Add aDuration to the receiver. Returns self.
+<br><br><br>
+
+<b>-= aDuration</b>
+<p>
+Subtract aDuration to the receiver. Returns self.
+<br><br><br>
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+</html>

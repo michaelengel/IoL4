@@ -1,0 +1,3 @@
+SOURCES += $(addprefix kdb/arch/powerpc/, regs.cc instr.cc prepost.cc \
+	hid.cc perf.cc)
+

@@ -1,0 +1,32 @@
+A quick and dirty guide to hacking IoOS/L4.
+Kentaro A. Kurahone (kurahone@sigusr1.org)
+
+General guidelines:
+ * Follow the coding convention.
+ * If possible minimise changes to IoVM.
+ * Abstract away platform specific code as much as possible.
+ * Add copyright on the top of each sourcefile.
+
+Coding convention:
+ * libCLight: 
+   * "{" and "}" get their own line.
+   * No tabs.
+   * Indentation is 2 spaces.
+
+libCLight in a nutshell:
+The libCLight sourcetree is aranged in the following fashion.
+  /libCLight/include         - Equivalent of /usr/include
+            /src             - General source files.  Platform independent.
+            /src/sysdep      - L4 dependant files.
+            /src/sysdep/i386 - ia32 specific files.
+
+System initialisation:
+ * L4 kernel and sigma0 load and init.
+ * crt0 (src/sysdep/$arch/crt0.S)
+   * Kernel stack lives in the .text section.
+ * __notmain (src/sysdep/notmain.c)
+   * Initialises L4 interface, other routine housekeeping.
+   * __init_core (src/sysdep/sbrk.c)
+     * Initialises malloc backing store. (Requests ram from sigma0)
+ * __do_main (src/sysdep/notmain.c)
+   * Sets up argc/argv, calls IoVM's main()

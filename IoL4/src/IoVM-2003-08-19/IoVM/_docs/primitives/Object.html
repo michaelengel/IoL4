@@ -1,0 +1,358 @@
+<HTML>
+<HEAD>
+<TITLE>Object</TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+A {text-decoration: none}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1> Object </H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<A NAME="Summary"></A>
+<h2>Summary</h2>
+<ul>
+An  Object is a key/value dictionary with string keys and values of any type. The prototype Object can be found in the Lobby. It contains a "clone" slot that is a CFuntion that creates new objects.
+When cloned, an Object will call it's "init" slot(if one is implemented) with the arguments passed to the clone call.
+<p>
+
+<b>Important safety tip:</b>
+The data structure used for objects is optimized for objects with relatively few slots(less than 100). <font color=red><i>Objects become very memory inefficient when they have a large number of slots.</i></font> Objects should not be used as large hash tables or lists. Use a Hash or List primitive instead.
+</i>
+</font>
+
+</UL>
+
+<A NAME="Methods"></A>
+<h2>Methods</h2>
+<UL>
+
+<b>clone</b>
+<p>
+Returns an new object whose proto slot is set to the receiver. The init method of the newObject will be called with any arguments passed to the clone method.
+<br><br><br>
+
+<b>shallowCopy</b>
+<p>
+Returns an new object whose slots key/value pairs are the same as the receiver. The init method is not called.
+<br><br><br>
+
+<b>type</b>
+<p>
+Returns the string "Object".
+<br><br><br>
+
+</UL>
+<h3>Output</h3>
+<UL>
+<BR>
+
+
+<b>print</b>
+<p>
+Prints a description of the receiver.
+<br><br><br>
+
+<b>write(<i>&lt;any number of arguments&gt;</i>)</b>
+<p>
+Sends a print message to the evaluated result of each argument.
+<br><br><br>
+
+
+</UL>
+<h3>Comparison</h3>
+<UL>
+<BR>
+
+<b>==(aValue)</b>
+<p>
+Returns the receiver is aValue is identical, nil otherwise.
+<br><br><br>
+
+
+<b>!=(aValue)</b>
+<p>
+Returns the receiver is aValue is not identical, nil otherwise.
+<br><br><br>
+
+</UL>
+<h3>Logical operations</h3>
+<UL>
+<BR>
+
+<b>and(aValue)</b>
+<p>
+Returns nil if aValue is nil, self otherwise.
+<br><br><br>
+
+
+<b>or(aValue)</b>
+<p>
+Returns self.
+<br><br><br>
+
+</UL>
+<h3>Introspection</h3>
+<UL>
+<BR>
+
+<b>setSlot(slotNameString, aValue)</b>
+<p>
+Sets the slot with the name specified by slotNameString to aValue in the receiver. Creates the slot if it is absent. Removes the slot if aValue is nil.
+<br><br><br>
+
+
+<b>getSlot(slotNameString)</b>
+<p>
+Returns the value of the slot with the name specified by slotNameString without activating the slot. Returns nil if the slot is not present.
+<br><br><br>
+
+<b>hasSlot(slotNameString)</b>
+<p>
+Returns self if the receiver has a slot with the name specified by slotNameString. Otherwise returns Nil.
+<br><br><br>
+
+<b>removeSlot(slotNameString)</b>
+<p>
+Removes the slot with the name specified by slotNameString. Does nothing if there is no such slot. Returns self.
+<br><br><br>
+
+<b>slotNames</b>
+<p>
+Returns a List containing the names of the slots in the receiver.
+<br><br><br>
+
+<b>foreach(&lt;slotName&gt;, &lt;slotName&gt;, &lt;aMessage&gt;)</b>
+<p>
+For each slot, set slotName to the slot's name and slotValue to the slot's value and execute aMessage. Example usage:
+
+<PRE>  myObject foreach(n, v, 
+    write("slot ", n, " = ", v type, "\n")
+  )</PRE>
+
+
+</UL>
+<h3>Method invocation</h3>
+<UL>
+<BR>
+
+<b>perform(methodName, &lt;arg1&gt;, &lt;arg2&gt;, ...)</b>
+<p>
+Performs the method corresponding to methodName with the arguments supplied.
+<br><br><br>
+
+<b>performWithArgList(methodName, argList)</b>
+<p>
+Performs the method corresponding to methodName with the arguments in the argList.
+<br><br><br>
+
+<b>?&lt;message&gt;</b>
+<p>
+Sends the message to the receiver if it can respond to it. Example:
+<PRE>  MyObject test // performs test
+  MyObject ?test // performs test if MyObject has a slot named test</PRE>
+The search for the slot only follows the receivers proto chain.
+<br><br><br>
+
+<b>forward(methodName, &lt;arg1&gt;, &lt;arg2&gt;, ...)</b>
+<p>
+Called when the receiver is sent a message it doesn't recognize. Default implementation raises an "Object.doesNotRespond" exception. Subclasses can override this method to implement proxies or special error handling.
+<br><br><br>
+
+<b>super &lt;message&gt;</b>
+<p>
+Sends the message to the receiver's proto with the context of self. Example:
+<PRE>  self test // performs test on self
+  super test // performs test on self proto but with the context of self</PRE>
+<br><br><br>
+
+</UL>
+<h3>Control flow</h3>
+<UL>
+<BR>
+
+<b>for(&lt;counter&gt;, &lt;start&gt;, &lt;end&gt;, &lt;do message&gt;)</b>
+<p>
+See manual.html.
+<br><br><br>
+
+<b>if(&lt;condition&gt;, &lt;do message&gt;, &lt;else do message&gt;)</b>
+<p>
+See manual.html.
+<br><br><br>
+
+
+<b>while(&lt;condition&gt;, &lt;do message&gt;)</b>
+<p>
+See manual.html.
+<br><br><br>
+
+<b>break</b>
+<p>
+Break the current loop, if any.
+<br><br><br>
+
+
+<b>continue</b>
+<p>
+Skip the rest of the current loop iteration and start on the next, if any.
+<br><br><br>
+
+<b>exit</b>
+<p>
+Exit the program.
+<br><br><br>
+
+
+</UL>
+<h3>Exceptions</h3>
+<UL>
+<BR>
+
+<b>catchException(exceptionNameString, &lt;doMessage&gt;, &lt;handleExceptionMessage&gt;)</b>
+<p>
+catchException() catches any exception whose name begins with the specified exceptionNameString. If an empty string is used, it will catch all exceptions.
+When an exception is caught, the local slots exceptionName and exceptionDescription will be set with the appropriate values. Example:
+
+<PRE>  catchException("Test", 
+    raiseException("Test.blah", "this is a test"),
+    write("got exception: ", exceptionName, " : ", exceptionDescription)
+  )</PRE>
+<br>
+
+<b>raiseException(exceptionNameString, descriptionString)</b>
+<p>
+Raises an exception with the given name and description.
+<br><br><br>
+
+</UL>
+<a name="Concurrency"></a><h3>Concurrency</h3>
+<UL>
+<BR>
+
+<b>@&lt;message&gt;</b> and <b>@@&lt;message&gt;</b>
+<p>
+Sends the message to the receiver asynchronously and returns immediately with a <a href="Future.html">Future</a>. Example:
+<PRE>  result = self foo  // normal, synchronous message send
+  future = self @foo // asynchronous message send, immediately return a Future
+  self @@foo         // asynchronous message send, immediately return Nil
+</PRE>
+The asynchrnous message is added to the receiver's asynchronous message queue and if it doesn't already have one, a coroutine is started to process the message queue.<p>
+The result of a @ asynchronous message can be accessed using the returned Future's value method:
+<PRE>
+  result = future value
+</PRE>
+This will pause the current coroutine until the receiver of the asynchronous message has processed the message. If the value method of the future is accessed by the coroutine of the Object processing the asynchronous method, an exception will be raised.
+<br><br><br>
+
+<b>yield</b>
+<p>
+Yield to other coroutines, if any. Returns self.
+<br><br><br>
+
+<b>pause</b>
+<p>
+Pause the coroutine of the receiver, if any. Returns self.
+<br><br><br>
+
+<b>resume</b>
+<p>
+Resume the coroutine of the receiver, if any. Returns self.
+<br><br><br>
+
+<b>wait(secondsNumber)</b>
+<p>
+Suspends the coroutine for the specified number of seconds. The seconds value can be fractional. Returns self.
+<br><br><br>
+
+<b>isActive</b>
+<p>
+Returns self if the receiver has a coroutine(whether or not that coroutine is suspended), Nil otherwise.
+<br><br><br>
+
+<b>activeCoroCount</b>
+<p>
+Returns number of active coroutines in the VM instance which the reciever lives in.
+<br><br><br>
+
+<b>setSchedulerSleepSeconds(aNumber)</b>
+<p>
+Sets the number of seconds to sleep between yields. This number must be lower than one and can be as small as 1 nanosecond. Returns self.
+<br><br><br>
+
+<b>schedulerSleepSeconds</b>
+<p>
+Returns number of seconds to sleep between yields.
+<br><br><br>
+
+
+</UL>
+<h3>Utility</h3>
+<UL>
+<BR>
+
+<b>method(&lt;arg name 0&gt;, &lt;arg name 1&gt;, ..., &lt;do message&gt;)</b>
+<p>
+Returns a method object whose argument names arg specified by all but the last argument and whose code is specified by the last argument.
+<br><br><br>
+
+<b>block(&lt;arg name 0&gt;, &lt;arg name 1&gt;, ..., &lt;do message&gt;)</b>
+<p>
+Same as method() but the returned block is lexically scoped.
+<br><br><br>
+
+<b>list(&lt;arg1&gt;, &lt;arg2&gt;, ...)</b>
+<p>
+Returns a new List containing the evaluated arguments passed as elements of the list.
+<br><br><br>
+
+<b>collectGarbage</b>
+<p>
+Runs garbage collector. Returns the number of items collected. 
+<br><br><br>
+
+<b>do(&lt;message&gt;)</b>
+<p>
+Performs the message in the context of the receiver. Returns self. Example:
+<PRE>
+a = Object clone do(
+  foo = method("bar\n" print)
+)</PRE>
+<br>
+
+<b>doString(aString)</b>
+<p>
+Evaluates the string in the context of the receiver. Returns the result.
+<br><br><br>
+
+<b>doMessage(aMessage)</b>
+<p>
+Evaluates the message object in the context of the receiver. Returns the result.
+<br><br><br>
+
+<b>uniqueId</b>
+<p>
+Returns a unique identifier for the receiver as a Number.
+<br><br><br>
+
+<b>getenv(nameString)</b>
+<p>
+Returns a string with the value of the environment variable whose name is specified by nameString.
+<br><br><br>
+
+
+</UL>
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+</html>

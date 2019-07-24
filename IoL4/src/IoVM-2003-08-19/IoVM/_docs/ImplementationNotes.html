@@ -1,0 +1,171 @@
+<HTML>
+<HEAD>
+<TITLE>Io Implementation Notes</TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>Io Implementation Notes</H1>
+<SMALL>Copyright 2002, Steve Dekorte. All rights reserved.</SMALL>
+<BR>
+<BR>
+
+
+<A NAME="Coding Conventions"></A>
+<h2>Coding Conventions</h2>
+<P>
+<UL>
+
+Io's C implementation uses what you might call an object oriented coding style as described here: <BR>
+<a href="http://www.dekorte.com/Software/C/Notes/OOC.txt">http://www.dekorte.com/Software/C/Notes/OOC.txt</a>
+<p>
+For this reason, sometimes Io's C structures will be referred to as "objects" in this document.
+It is recommended that these conventions be followed when modifying Io, or adding new addons. The core of Io will be C only (no C++, Objective-C, etc) and addons should avoid using non C languages as much as possible.
+<p>
+Io specific primitive data structures and addons should be prefixed with "Io".
+
+<P>
+</UL>
+
+<A NAME="Code Directories"></A>
+<h2>Code Directories</h2>
+<P>
+<UL>
+
+Io's source code is divided into several areas:
+<BR>
+<BR>
+
+<b>IoVM/base/</b>
+<p>
+
+Reusable data structure and utility library - code not specific to Io. These files do not reference any external files other than the ANSI C standard library headers. Example objects: List, Hash, Parser
+<p>
+
+<b>IoVM</b>
+<p>
+Io runtime system, and core primitives. These files only reference those in Io/base and ANSI C standard library headers. Example objects: IoState, IoMessage, IoObject, IoNumber, IoString
+<p>
+
+<b>IoServer</i></b>
+<p>
+
+Additional primitives and extensions to core Io primitives. These provide access to platform dependent libraries and other non-core libraries that are not GUI related. 
+<p>
+
+<b>IoDesktop</i></b>
+<p>
+
+Primitives and extensions to core Io primitives that are GUI related. 
+<p>
+
+<P>
+</UL>
+
+
+<A NAME="Runtime"></A>
+<h2>Runtime</h2>
+<P>
+<UL>
+
+<b>How code is represented</b>
+<p>
+Io's base instruction is a message send. When compiled, Io code is simply turned into a  message tree. Each node of the tree is an IoMessage structure(object). The structure of an IoMessage looks like this: 
+<PRE>IoMessage
+  name (a literal IoString containing the name of the message)
+  arguments (list of other IoMessages)
+  attachedMessage (another IoMessage or NULL)
+  nextMessage (another IoMessage or NULL)
+</PRE>
+
+<b>How code is executed</b>
+<p>
+If you flattened this message tree out in memory and wrote a function that walked through it and maintained a stack, you'd have a traditional bytecode based VM with a single instruction type(send message). But Io doesn't do this(at least not at the moment). Instead a it calls a function on the top message object which gets called recursively to execute the messages.
+<p>
+A message is executed in a context. A context is made up of:
+<PRE>  message (the current message)
+  target (a reference to an Io primitive)
+  locals (an IoObject used to store local variables)
+</PRE>
+<p>
+These function calls come with a performance hit over bytecode systems, but it greatly simplifies the implementation (a simple recursive call on a small function instead off a giant switch statement). And Io manages to still performs as well (or better) than the popular bytecode based scripting languages.
+<p>
+<b>Semantics of a message send</b>
+<p>
+In Io..
+<p>
+
+</UL>
+<A NAME="Notes on Core Primitives"></A>
+<h2>Notes on Core Primitives</h2>
+<UL>
+
+<b>IoString</b>
+<p>
+Strings are literals (only one copy of each unique string)
+<p>
+
+<b>IoNumber</b>
+<p>
+Numbers are *copied* when stored.
+</UL>
+
+
+<P>
+
+</UL>
+<A NAME="Garbage Collection"></A>
+<h2>Garbage Collection</h2>
+<UL>
+
+You only need to do marks on references to actual Io primitives. Memory allocated within a primitive for internal use is up to the primitive to deallocate. Io uses an incremental garbage collector which means it does a little garbage collection work on each allocation instead of all at once with a large mark and sweep. Io's incremental collector uses a "write-barrier" which means that when an object adds  sets a local reference to another object, it needs to tell the collector about it. This is done with the IOREF() macro.
+
+<P>
+</UL>
+
+<A NAME="Coroutines"></A>
+<h2>Coroutines and Exceptions</h2>
+<P>
+<UL>
+
+Io's coroutines and exceptions use setjmp, longjmp and some related tricks. Be careful when using Io with C++ as C++ can allocate its objects on the stack. If a long jump occurs while C++ has such objects on the stack, their destructor methods may not be called and this will result in a memory leak if their constructors allocate heap memory. See <A HREF="http://freetype.sourceforge.net/david/reliable-c.html">this paper</A> for info on safely using C++ with coroutines. Also, note, as Andrew Cooke put it: "HOWEVER, thinking about this, it's probably not as bad as it sounds.
+i guess while you're in your own code nothing bad is going to happen.
+you only have to be careful if you "re-enter" io.  this might be what
+you are thinking anyway, or what you've said that i've missed, or what
+the warning you quoted said, when you first posted...
+
+so you can probably (i'm guessing here) use io coroutines and
+exceptions as long as they are within io.  there should only be a
+problem if you have a c++ routine which is "in the middle of doing
+something" when a jump occurs.  if a jump occurs before or after
+calling c++ then there's no problem (bad things might happen if, say,
+you call c++ from io which itself calls io, from inside c++, which
+then triggers an exception; another example might be calling the c/c++
+routine that io uses to generate exceptions from c++)."
+<P>
+</UL>
+
+<A NAME="Performance Tricks"></A>
+<h2>Performance Tricks</h2>
+<P>
+<UL>
+Some tricks Io uses to improve performance:
+<UL>
+<LI> Objects and primitives use perfect hashes to store slots(methods and instance variables)
+<LI> Hash lookups done by literal string pointer(instead of string value)
+<LI> Numbers can be directly modified (since they are copy on write)
+</UL>
+</UL>
+<BR>
+<BR>
+<BR>
+<BR>
+
+</font>
+</body>
+</html>

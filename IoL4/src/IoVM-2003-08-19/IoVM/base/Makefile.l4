@@ -1,0 +1,75 @@
+# ========================================================
+# Makefile for basic data strucutre and utility objects
+# ========================================================
+WARN := -Wall -Wstrict-prototypes -Winline
+# remove "-no-cpp-precomp" on windows
+
+# if your system doesn't have (or need) ranlib, change "ranlib" to "true".
+# on some systems, "ar s" does it.
+RANLIB := ranlib
+#RANLIB := ar s
+#RANLIB := true
+TARGET := all
+
+# this should work in all unix systems.
+AR := ar rcu
+
+#PLATFORM := $(shell uname -sp)
+#OS := $(shell uname -s | tr "[:lower:]" "[:upper:]")
+#PROCESSOR := $(shell uname -p | tr "[:lower:]" "[:upper:]")
+
+OP := -O2 -g
+
+#ifeq ($(PLATFORM), FreeBSD alpha)
+#  OP := -O -g
+#endif
+
+#ifeq ($(PROCESSOR), powerpc)
+#  OP := -Os
+#  -fkeep-inline-functions #-fno-function-cse -fno-peephole2
+#endif
+
+
+# ========================================================
+
+LIB := libIoBase.a
+
+CFLAGS := $(OP) -D$(TARGET) $(WARN) -I. -I../../../libCLight/include -nostdinc -fno-builtin -I../../../pistachio-0.2/user/include
+
+# ========================================================
+
+BASIC_OBJS := \
+	Common.o \
+	ByteArray.o \
+	PHash.o \
+	Stack.o \
+	Scheduler.o \
+	SplayTree.o \
+	List.o \
+	Hash.o \
+	LinkedList.o \
+	CLI.o \
+	PortableStrptime.o \
+	Queue.o \
+	SDSort.o \
+	MainArgs.o 
+
+
+all: 
+	$(MAKE) config
+	$(MAKE) $(LIB)
+
+config:
+	#echo "#define IO_OS_TYPE_$(OS)" > IoConfig.h
+	#echo "#define IO_PROCESSOR_TYPE_$(PROCESSOR)" >> IoConfig.h
+	#echo "" >> IoConfig.h
+
+
+$(LIB): $(BASIC_OBJS)
+	$(AR) $@ $(BASIC_OBJS)
+	$(RANLIB) $@
+
+
+clean:
+	rm -f $(BASIC_OBJS) $(LIB)
+

@@ -1,0 +1,933 @@
+
+To Do (long term)
+=================
+- performance
+  - incremental frees
+  - move Map primitive to use open addressing hash
+  - switch sockets to use coro pause/resume while waiting for select
+  - jit compiler for math
+  - replace splay tree with hash for literal string lookup
+  - do more lazy allocation (eg: Font texture cache)
+  - tail call optimizations?
+- usability
+  - add hasProto or isKindOf
+  - launchPath stack - import
+  - better stack traces, stack introspection api
+- flexibility
+  - abilty to proto inherit from non-object primitives?
+  - non-object actors?
+- addons
+  - dns lookup caching
+  - support multiple dns server ips, handle more error cases
+  - integrate host->ip lookups with other socket primitives
+  - timers?
+  - reverse dns?
+  - BigNumber
+  - LineEdit (started but not finished yet)
+
+To Do (short term)
+==================
+- Sam Sandqvist's WIN32 suggested changes \ vs. /
+- Save Io state and serialization
+- move non UI Image code, zlib and lzo to IoServer
+
+To Do (immediate)
+==================
++ activation of methods/blocks on parent slot?
++ have gc color group value added to front for better cache performance?
++ add IoBundle to Mac binary release (Zac Bir)
++ List remove with vargs (suggested by Juansa)
++ convert SocketManager to use libevent
++ add isToday, isYesterday, etc methods to Date
+
+++++ need to fix mem leak with methcall test!
+
+Release 2003 08 ?? - fixes
+==========================
+- several memory leak fixes (by Daniel A. Koepke)
+
+
+Release 2003 08 18 - fixes
+==========================
+- changed Server and UDPReceiver to not use delegates
+- fix for super lookup loop
+- IoString memory leak fix (by Daniel A. Koepke)
+
+
+Release 2003 08 15 - important gc fix
+=====================================
+- fixed GC bug with IoMessage_setCachedArg_toInt_()
+- fixes for GL demos
+- ObjcBridge addon init call uncommented :-)
+- 30% faster IoMessage_locals_performOn_() (by Daniel A. Koepke)
+- return value for break() (by Daniel A. Koepke)
+
+Release 2003 08 10 - locals delegate to target, SleepyCat
+=========================================================
+- locals now delegate-to instead of inherit-from target
+- basic SleepyCat binding
+- fix for File_asString (by Roberto Amorim)
+- fixes for wordfreq demo and some define names (Daniel A. Koepke)
+
+Release 2003 07 11 - fixes
+==========================
+- fix for Object_notEquals (by Uladzimir Liashkevich)
+- fix for windows defines (by Roberto Amorim)
+
+Release 2003 07 10 - Socket fixes
+=================================
+- fixes for Socket and UDPSocket (by Roberto Amorim and Alexandre Barbosa)
+
+Release 2003 07 07 - fixes
+==========================
+- fixes for WeakLinks (by Roberto Amorim)
+
+Release 2003 06 07 - fixes
+=======================================
+- fixed memory leak
+- reduced number of yields
+- fix for proper pause/resume behavior
+- added some concurrency performance tests
+  (Io handles 10,000 threads easily and is 
+   30x faster than Python for threads shootout test)
+
+Release 2003 06 05 - fixes
+=======================================
+- fix for Buffer at (by Andras Pahi)
+- fix for ObjcBridge for GNUstep (by Sebastien Pierre)
+- fix for textures on OpenGL tutorial #6 (by Jeffrey Palmer)
+- fix for perform() (bug reported by Peter William Lount)
+- fix for Directory (by Daniel Vollmer) (was in last release)
+
+Release 2003 06 04 - fixes
+==========================
+- moved Coroutine queue from LinkedList to Queue (less memory, fewer allocs)
+- fix for ObjcBridge init (reported by Sebastien Pierre)
+- fixes for Buffer asBinaryNumber and Number asBuffer (by Andras Pahi)
+- fix for GC bug (reported by Andras Pahi)
+- fix for List random ignoring last element (reported by Juansa)
+- fix for Directory (by Daniel Vollmer)
+
+Release 2003 06 03 - mutable primitives
+=======================================
+- all primitives converted to be normal objects
+- faster proto lookups, proper parent lookups
+- forward changed not to take arguments - use thisMessage instead
+- LinkedList updates by Miles Egan
+- ByteArray varargs and readFromFile fixes by Chris Peterson
+
+Release 2003 05 22 - forward loop detection
+===========================================
+- added forward loop detection
+(mostly just a check-in before making some big changes)
+
+Release 2003 05 19 - Store, Soup updates, fixes
+===============================================
+IoDesktop
+- fixes for Mingw and GL demos (by Brent Fulgham)
+- IoDesktop build fix for fink (by Kon Lovett)
+IoServer
+- added File methods for stat info (by Miles Egan) - need windows port
+- new Store primitive (written in Io)
+- removed Soup setDebug method
+- added new Soup methods
+- added SQLite tableNames, columnNamesOfTable, debugOn, debugOff, isOpen, itemWhere, escapeString methods
+IoVM
+- added String justify methods (by Daniel A. Koepke)
+- fixes for IoNumber asString and String toBase/fromBase (by Daniel A. Koepke)
+- fix for performWithArgs() (by Daniel A. Koepke)
+- changed String asNumber to return Nil upon parse error (suggestion & help from Scott Dunlop)
+- added String replaceMap() method
+- changed Map at() takes optional 2nd arg
+- added Map atElsePut() method
+- added Primitive isNil, ifNil, ifTrue, ifFalse methods
+- fixed bug with reading standard input
+
+Release 2003 05 10 - Mingw IoDesktop fixes
+==========================================
+- fixes for mingw IoDesktop (by Brent Fulgram)
+- added support for List foreach(v, ...)  (suggested by Daniel A. Koepke)
+
+Release 2003 05 07 - NetBSD
+=========================================
+- fixes for building on NetBSD
+
+Release 2003 05 06 - EditLine, fixes
+=========================================
+- fix for list comparison [IMPORTANT]
+- fixed URL primitive (downloading binaries)
+- fixes for winsock (by Daniel Vollmer)
+- fix for getSlot symbol missing in Visual C
+- fixed off-by-one line number error in stack traces
+- changed to "==>" CLI output format (suggested by Daniel A. Koepke)
+- changed SGML parser to make all tag and attribute names lowercase
+- added getCh to Curses primitive (by Scott Dunlop)
+- added Buffer between() method
+- added URL childUrl() method
+- added User primitive to IoServer
+- added EditLine addon (by Edwin Zacharias)
+- added OpenGL glCopyTexSubImage2D function
+- added JEdit syntax highlighter file (by Sebastien Pierre)
+
+Beta Release 2003 05 03 - inlining cleanup
+================================================
+- make install
+- inline cleanup
+- cygwin fix for IoDesktop Image addon
+
+Beta Release 2003 05 01 - inlining update, fixes
+================================================
+- List translate and translateBlock methods
+- fix for double buffering in GL demos (by Brent Fulgham)
+- Daniel Vollmer's VisualC project updates 
+- new inlining technique (suggested by Daniel A. Koepke)
+- grabTexture drawTexture
+- Primitive now implement slotNames
+
+Beta Release 2003 04 27 - Quicksort, small fixes
+==================================================
+- changed List sortBy from bubble sort to quick sort (with in-order check)
+- a few small build and ANSI C fixes
+
+Beta Release 2003 04 26 - Mingw, Visual C, winsock
+==================================================
+removals:
+- removed argMessages (thisMessage arguments is the same thing)
+
+additions:
+- added target local to Blocks
+- Mingw coros (by Pit Capitain)
+- Visual C coros (by Daniel Vollmer)
+- added Object compileString() method (returns message or error string)
+- added Object shallowCopy method
+- added Message argAt(), cachedResult and setCachedResult() methods
+- added fnmatch addon to IoServer (suggested by Vladimir Ulogov)
+- added page http://www.iolanguage.com/SubmittingCode.html
+- added Box, GLScissor primitives (not yet documented), Ion update
+
+fixes:
+- winsock and Visual C port (by Daniel Vollmer)
+- Mingw fixes (by Pit Capitain)
+- fix for State_justPrint() (by Daniel A. Koepke)
+- fix for Object doFile() (reported by Vladimir Ulogov)
+- fix for Hash removeKey (by Kentaro A.Kurahone)
+
+
+Beta Release 2003 04 22 - Mingw, fixes
+=========================================================
+- fix for break method (reported by Fan Hongjian)
+- Director at() now accepts relative paths
+- improved error messages
+- IoVM compiling on Mingw (help from Ashish Ranjan)
+- Future sendResponseTo() response is async message to response target
+
+Beta Release 2003 04 19 - GNUstep, Regex fix, fonts added
+=========================================================
+- Sebastien Pierre's GNUstep changes to ObjcBridge
+- fix for Regex strings (bug investigated by Tov Are Jacobsen)
+- added BitStream Vera fonts to IoDesktop/Library/Fonts
+- added glRect
+
+Beta Release 2003 04 18 - 64bit clean, FreeBSD/Alpha coros
+==========================================================
+- 64bit clean (by Kentaro A. Kurahone)
+- FreeBSD/Alpha coroutine support (by Kentaro A. Kurahone)
+- fix for File readLines returning 1 empty line for an empty file. (reported by Tov Are Jacobsen)
+
+Beta Release 2003 04 16 - Futures
+=================================
+- @ asynchronous messages now immediately return a "Future" object
+- @@ asynchronous messages immediately return Nil
+- fix string/buffer comparison fixed (reported by Scott Dunlop)
+- Image grab() method added, several other Image methods documented
+
+Beta Release 2003 04 14 - font textures, fixes
+==============================================
+- Mike Austin's font texture caching(much faster) - Thanks Mike!
+- added Point Min/Max methods
+- added many new GLUT functions
+- changed blocks not to set "self" slot (problem reported by Daniel A. Koepke) 
+- fix for quote parsing bug (reported by Kevin Greer)
+- Object performWithArgList() method added
+- fix for variable declaration in IoBlock.c(sent by several people)
+
+
+Beta Release 2003 04 10 - [IMPORTANT] blocks->methods, variable args, activate  
+==============================================================================
+- [IMPORTANT] blocks and methods 
+  block() renamed method(), block() is now lexically scoped
+  changed all sample code and docs to use method()
+  sorry, but you'll need to do a string replace of "method(" for "block(" in your Io code.
+  this will hopefully be the last change that is so disruptive
+- [IMPORTANT] variable arguments
+  if last arg of block/method args is named "args" remaining args are evaluated, 
+  put in a list and assigned to the "args" slot.
+  if last arg of block/method args is named "argMessages" remaining arg messages are 
+  put in a list and assigned to the "argMessages" slot.
+- if Object contains "activate" slot that holds a method, it is called when 
+  a slot holding the object is accessed
+
+Beta Release 2003 04 09 - fixes  
+=======================================================
+- precedence fixes
+- fix for parent slot lookups
+- parent slot lookups now check to see if non-object primitives respond to message
+- fix for GL textures
+
+Beta Release 2003 04 06 - namespace organization, fixes  
+=======================================================
+- slot lookup loop detection
+- namespace reorganization (everything works the same, it's just organized now)
+- fix for precedence of "?"
+- added Block setMessage, added nil check to Block message method
+- added Object doMessage() (this will replace message doInContext())
+- added Message fromString() method
+- renamed "numberId" method to "uniqueId"
+- list() method added to Object
+- renamed Map, List, LinkedList method "do" to "doBlock" so meaning isn't confused with Object do() 
+- removed JIT code from IoVM (will make it an addon when lightning or Mite is working)
+- got rid of static structs in Portablestrptime.c
+
+Beta Release 2003 03 31 - new parser, fixes
+===========================================
+- new lexer&parser (cleaner and fixes several bugs)
+-- now supports triple quotes, hex and scientific notation numbers
+- [internal] removed use of catch keyword in State.[hc] (fix by Max Battcher)
+- FreeBSD fixes including BSD coroutines (by Faried Nawaz)
+- removed GL glutSetKeyRepeat (only need glutIgnoreKeyRepeat)
+- added glutKeyboardUpFunc (added by Mike Austin)
+- cygwin fix in png make (thanks to Mike Austin)
+- modest performance improvements (maybe 5%)
+-- Nil caching and avoiding function calls on nextMessage
+- added nanosleep to Scheduler yield (suggested by Daniel A. Koepke)
+-- setSchedulerSleepSeconds() and schedulerSleepSeconds() methods added to Object
+- added String "+" operator - ".." is deprecated and will be removed soon
+- changed OpenGL yielding to use timer instead of glut idle callback
+
+Beta Release 2003 03 19 - important fixes
+=========================================
+- [IMPORTANT] removed gethostbyaddress from Socket.c
+- fix for return in foreach() (reported by Daniel A. Koepke)
+- full screen mode OpenGL support (added by Mike Austin)
+- glut char repeat API support
+- fix for JPG image loading and image test
+- fix for PNG image support on cygwin (fix by Mike Austin)
+- GLUCylinder, GLUSphere primitives added
+- fix for object comparison crash in IoVM
+- now limits stack Message info to 40 characters
+- a bunch of cygwin fixes (by Mike Austin)
+
+Beta Release 2003 03 17 - Soup, DBM, fixes
+==========================================
+- added Soup and DBM primitives
+- added IoLanguage bundle for OSX
+- [internal] renamed tag "Callback"s to "Func"s.
+- fix for next and attached message nil check (fix by Daniel A. Koepke)
+- mod renamed back to % (by popular demand)
+- fix for passing back objects in ObjcBridge
+- renamed RegularExpression to Regex
+- Yo's inline fixes and Scintilla syntax coloring file
+- fixes for handling select() errors
+
+Beta Release 2003 03 15 - URL, CGI, DOServer, DOConnection
+==========================================================
+- new URL, CGI, DOServer and DOConnection primitives in IoServer
+- added SGMLTag to Lobby and added a setName() method (requested by Max Battcher)
+- fix for stack traces
+- fix for String replace method
+- fix for File readLines (last line was left out)
+- new Io2C.io script in Sockets/_tests
+- File now errors if openForReading file doesn't exist
+- Fix for RegularExpression variable declaration (reported by Damien George)
+- Removal of ^Ms in libpng (reported by Damien George)
+
+Beta Release 2003 03 12 - fixes
+===============================
+- renamed Number % operator to mod()
+- List comparison improved (Requested by Nigel Brown)
+- continue and split bugs fixed (reported by Jason Sackett)
+
+Beta Release 2003 03 11 - fixes
+===============================
+- new web site! http://www.iolanguage.com/
+- replaced Number round method with roundUp and roundDown methods
+- fixed another List random bug
+- added several new String methods 
+- String find now returns Nil on no match
+- setup web site to download releases from mirror at mike-austin.com (Thanks Mike!)
+  (also working on an east coast mirror with Zack Bir)
+- fixes for RegularExpression and a number of new options added
+- fix for bug in ObjcBridge introduced in last release
+- fix for bug in String pathExtension
+- add List select, detect and reject methods
+
+Beta Release 2003 03 08 - extra args, fixes
+===========================================
+- increased default select timeout to 0.1 seconds
+- possible fix for byte order of IPs when using Host primitive (thanks to Edgar Toernig)
+- internal: replaced malloc/memset with calloc
+- fix for List randomize method (reported by Jason Sacket)
+- new options on Number random/Random methods
+- renamed Number randomseed method to setRandomSeed
+- added Number round method
+- ObjcBridge fix by Nils SvangŒrd
+- added List print method
+- added RegularExpresion method matchEmptyOff/matchEmptyOn
+- extra block args are now put in a List and assigned to the local slot "args" (feature request from Daniel A. Koepke)
+
+Beta Release 2003 03 06 - fixes
+===============================
+- changed launchPath to use current working directory if needed (reported by Mike Austin)
+- internal: renamed USTRING() macro to IOSTRING()
+- fix for mpeg2dec libtool file (reported by Ed Heil)
+- fix for formating of stack staces
+- added parser check for closing parens
+- added an FAQ page: http://www.dekorte.com/Software/C/Io/FAQ.html
+- added isEqualAnyCase, and linePrint methods to String
+- fix for root Makefile configure (reported by Markus Fritsche)
+
+Beta Release 2003 02 24 - fixes
+===============================
+- fix for exceptions when using ObjcBridge with InterfaceBuilder
+- fix for elseif() - reported by Mike Austin
+- added line number info to stack traces
+- changed ":" to "@" for async messages
+- ":"s can now be used in message names
+-- this is useful for Objective-C bridge messages
+- made OSX project paths relative(thanks for feedback from Z. Bir)
+- reduced release sizes but dropping some dead wieght
+
+Beta Release 2003 02 21 - fixes
+===============================
+- Cleaned up garbage collection in ObjcBridge
+- fix for libsgml make
+- fix for Linux IoDesktop make suggested by Chris Double
+- added a help suggestions page: http://www.dekorte.com/Software/C/Io/help.html
+
+Beta Release 2003 02 19 - ObjcBridge w/InterfaceBuilder, SGML
+=============================================================
+- added ability for ObjcBridge to work with InterfaceBuilder
+- XML addon rewritten using libsgml, now supports SGML, HTML and XML
+- added _libs folder in IoVM/IoServer/IoDesktop for libs
+- added _include to IoVM
+- Fix for OpenAL configure (missing test folder)
+- Movie config disables SDL by default (thanks for testing to Zachery Bhir)
+- TiffImage.c ANSI fix reported by Mike Austin
+- added "activeCoroCount" method to Object
+- fix for copying numbers for cached message arguments
+- added OSX project for Io in Io/Projects/OSX
+
+
+Beta Release 2003 02 14 - IoDesktop on Linux fixes
+==================================================
+- fixes for building IoDesktop on Linux 
+
+Beta Release 2003 02 13 - Objective-C bridge
+============================================
+- added an Objective-C/Io bridge (still need to make refs weak links)
+
+Beta Release 2003 02 10 - configure, Perl5 regex
+================================================
+- fixed some IoDesktop make problems on Linux
+-- OpenAL builds on Linux now
+- added support for "make configure" to all makefiles
+- moved RegularExpression primitive to use PCRE 
+-- PCRE is Perl 5 compatible and has a BSD style license
+-- makeover of RegularExpression API
+-- set to build with IoServer by default
+
+Beta Release 2003 02 09 - if, _ args, Tree
+==========================================
+- can use if in if() then() elseif() else() form
+- if a block arg name begins with "_" the arg message is passed instead of being evaluated
+- added Message doInContext() method
+- added Tree primitive with support for BST, Red Black, Splay and AVL trees.
+- fix for PHash_removeKey_() bug
+- updated OpenGL examples to use Image object
+- Buffer compression methods lzoCompress and lzoUncompress
+- added some OpenGL functions and constants(including Lighting)
+-- added Io versions of NeHe OpenGL tutorials
+- improved error messages and stack traces
+-- for = syntax errors
+-- limited to 1 message printout
+- added define for DOS path separator but still need to add checks for it 
+
+Beta Release 2003 01 22 - zlib compression
+==========================================
+- Buffer compression methods zCompress and zUncompress
+
+Beta Release 2003 01 21 - jpeg, tiff support
+============================================
+- Image now supports jpeg, tiff formats and cropping
+- Images can now be saved 
+- Note: there are still bugs with reading tiff and writing png
+
+Beta Release 2003 01 15 - curses
+================================
+- Edwin Zacharias' curses bindings 
+
+Beta Release 2003 01 13 - better stack traces
+=============================================
+- makefile fixes suggested by Daniel A. Koepke
+- better stack traces
+- (internal) moved next & previous into mark
+- added system() method
+- fixed min/max bug
+- removed forward from Lobby since default behavior is to raise exception anyway
+
+Beta Release 2002 12 11 - WeakLink, Duration
+============================================
+- added WeakLink primitive
+- added Daniel Koepke's fix for zero argument bug with "?" operator
+- replaced String doString method with Object doString.
+- added File do() and Object doFile().
+- String doString now looks up lobby slot from locals
+- added Duration primitive and Date methods related to it and docs 
+  as suggested by Sean Perry
+- Added Date setFormat and format methods
+- (internal) changed color to mark with bitfields
+
+
+Beta Release 2002 12 05 - Movie, CharacterConversion, Image textures
+====================================================================
+- fixed bug in Font length method and added length caching
+- fixed min/max bug in Number
+- added some more GL calls and constants
+- added Block setArgumentNames() method
+- changed slot activation to use a callback so people can 
+  write their own block/function/closure primitives
+- fixed leak in PNGImage
+- fixed a few compiler warnings on Linux
+- overhauled the Image code to make it easier to add new decoder/encoders
+- Added texture functions to Image primitive
+- Added Movie primitive with mpeg2 support
+- Added character encoding conversion support using libiconv
+- Added some untested Irix coro code to Scheduler.c
+- fixed bug with appending to an empty path
+- fixed bug with replacing a suffix in a string or buffer 
+
+
+Beta Release 2002 11 27 - Soups, improved build scripts
+=======================================================
+- a number of build fixes
+- added auto platform detection to makefiles (thanks to Mike Austin)
+- fixed exec bug in SQLite binding
+- added NetwonScript-like Soup and Dbm-like demos to SQLite tests
+- added Font length method
+- changed Image origin to be bottom left(instead of bottom right)
+- added Map remove method
+- removed some debugging printfs from IoDesktop
+- fix for file name as launchPath bug 
+- added optionalSeperatorString argument to String join method
+
+
+Beta Release 2002 11 24 - OpenAL, FreeType, SQLite, PNG
+=======================================================
+- OpenAL, FreeType, SQLite and PNG image bindings
+- added Number at(index, length) method which returns a number with the bit value at the given index
+--  if a second argument is given the number is the value of the number with the bits from index to index + length
+- added optional 2 arg to Buffer at() 
+-- the second arg speficies the number of bytes to read into the returned number
+- fixed bug in Buffer atPut()
+  added to IoDesktop(only tested on OSX so far)
+- added name method to Directory and File primitives
+- possible fix for coroutines on the Zaraus
+- Fixed async message ordering (first-in-first-out)
+- added cygwin Directory support code eby Mike Austin
+- fixes for makefiles suggested by Sean Perry
+- updated version (suggested by Jurrie Lulofs) 
+-- added distribution variable in lobby
+-- both are printed on CLI startup
+
+
+Beta Release 2002 11 19 - IoVM/IoServer/IoDesktop split
+=======================================================
+- reorganized code into IoVM/IoServer/IoDesktop
+- cleanup of build system 
+-- to embed the IoVM, just link libIoVM.a
+-- addons each have their own Makefile 
+-- addons initialization call standardized and moved to addons(out of main.c)
+- added Mike Austin's glutPassiveMotion code
+- updated OpenGL demos
+- swapped order of arguments in Date formatString so future
+  version can use the format optionally
+- added "-" method to Object and changed "-" parse rules 
+   so expresions like "-2.3" evaluate properly
+
+Beta Release 2002 11 17 - GL improvements
+=========================================
+- added Mike Austin's GL passiveMotion, GLUT_DOUBLE and GLUT_RGBA code 
+- fix for gc error that was causing a crash in GL events
+- speedup for prints
+
+Beta Release 2002 11 16 - Date and File improvements
+====================================================
+- Date 
+  - added fromNumber(aNumber) and print methods
+  - added Sean Perry's fromString() method and PowerDog's strptime()
+- updated Docs (lots of changes)
+- File
+  - Removed File setMode() method and replaced with 
+    openForReading(), openForUpdating() and openForAppending()
+  - added at(), atPut() and foreach() methods
+- lowered default Map size
+- changed Buffer subbuffer to fromTo
+
+Beta Release 2002 11 14 - async DNS, new Docs, wait(), carriage return cleanup
+==============================================================================
+- lots of documentation corrections by Sean Perry - Thanks Sean!
+- added wait(seconds) method to Object
+- sockets addon
+  - asynchronous DNS support
+    - added Host object which support DNS hostname to IP lookups
+    - added a DNSResolver object for setting the list of DNS servers to use for lookups
+- cleanup
+  - got rid of carraige return end of line characters in source files
+- small change to directory addon for Linux
+
+Beta Release 2002 11 09 - Symbian patch
+=======================================
+- added Chris Double's patch for Symbian
+
+Beta Release 2002 11 08 - DO example, async fixes
+=================================================
+- added distributed objects example code
+- fix for multi argument bug in async messages
+- fix for perform with complex arguments
+- support for perform on primitives
+- Number asCharacter method returns a buffer if character is a NULL
+- Buffer split fixed to work with buffer arguments(instead of just strings)
+- Buffer append method support for variable argument lists
+
+Beta Release 2002 11 01 - String and Buffer foreach, gc improvement
+===================================================================
+- added String and Buffer foreach methods
+- major performance improvement for incremental garbage collector
+
+Beta Release 2002 10 27 - ? operator, cgi 
+=========================================
+- Object
+  - added "?" operator method
+    - ? means send if the target responds to the method
+    - example: ?foo is equivalent to if( hasSlot("foo"), foo)
+  - added isActive method (tests if receive has a coroutine)
+- fixed serious bug with string/buffer replace method
+- cgi related
+  - added Object getenv method
+  - fixed printing of strings with % characters
+  - added String fromBase and toBase methods (bases 8 and 16 supported)
+  - added cgi sample code in tests/cgi
+- Date
+  - added Date set and asNumber methods 
+  - added Number asDate method
+- String
+  - fix for lastPathComponent method when single component
+- Number
+  - changed default conversion to string format from %g to %f
+- renamed "clear" methods to "empty"
+- added List first and last methods
+
+Beta Release 2002 10 14 - incremental collector
+===============================================
+- moved to incremental garbage collector(tri-color, write barrier)
+  - about 15% slower than mark and sweep, but no mark pauses
+- fixed bug with coro resume/pause 
+
+Beta Release 2002 09 29 - Symbian patch
+=======================================
+- merged with Chris Double's Symbian changes (Thanks Chris!)
+
+Beta Release 2002 09 25 - pause/resume
+======================================
+- added Object pause/resume methods to remove/add an Object's 
+  coro from/to the Scheduler
+- removed PHashLite
+- State now caches current retain stack pointer(small performance improvement)
+
+Beta Release 2002 09 19 - fixes
+===============================
+- fixes (suggested by Mike Austin)
+  - parser "#" comment bug
+  - File write method now supports buffer argument
+- did some memory size reductions(down to 184k core)
+- fixed CYGWIN coro code with suggestion from Chris Double
+
+Beta Release 2002 09 13 - portability and parser fixes
+======================================================
+- portability (Chris Double suggestions)
+  - fixed line returns in Common.h WIN32 defines
+  - added symbian defines
+  - added USE_PHASH_LITE option so LOW_MEMORY_SYSTEM
+    can be turned on without it
+- parser
+  - fixed bug with operators
+  - fixed unterminated parens bug 
+    (reported by Benedikt Rosenau and Jim Mathies)
+- fixed return/break bug in foreach
+
+Beta Release 2002 09 10 - parent->proto, delegate->parent name changes, fixes
+=============================================================================
+- portability
+  - WIN32 defines in Common.h suggested by Jim Mathies
+  - changed remaining void *s to unsigned char *s in PHash.h
+  - lots of small portability changes suggested by Mike Austin
+- runtime
+  - changed "parent" slots to "proto" and
+    changed "delegate" slot to "parent" so
+    terms match NewtonScript usage
+  - fixed "super" operator bug
+  - fixed init to always return newObject
+- GL addon
+  - added a Point primitive
+  - added some texture and other gl functions - code by Mike Austin
+- core primitives
+  - Date: removed "_"s from methods
+  - Number: added "between" and "Negate" methods
+  - Buffer: added "at" and "atPut" methods suggested by Mike Austin
+    - added byteCache
+  - String: renamed "characterAt" to "at"
+
+Beta Release 2002 09 08 - coro cleanup
+======================================
+- GL
+  - added IoState_yield to GLUT idle callback so coros
+    can be used with GLUT apps
+  - glutInit now gets proper args as suggested by Mike Austin
+- changed some String method arguments to be optional
+- lots of small portability changes suggested by Chris Double
+  - merged Scheduler and threads.c and moved to base directory
+- fix for coro deactivate bug
+
+
+Beta Release 2002 09 06 - UDP, docs, fixes
+==========================================
+- sockets
+  - added UDP primitives
+  - fixed missing Server delagate methods
+- embedding
+  - added IoScheduler to encapsulate coro code
+  - added void *userData member to IoState(as suggested by Chris Double)
+  - converted remaining printf()s to IoState_print_()
+  - removed static variables in IoBuffer and ByteArray
+- fixes for bugs reported by Mike Austin
+  - added Object do method
+  - fix for fractional number compares 
+  - fix for +=, -=, etc parse bug 
+- changed delegate to properly use context of self
+- docs
+  - added link to addon docs in manual
+  - started ImplementationNotes.html document
+
+Beta Release 2002 09 01 - async sockets
+=======================================
+- sockets addon
+
+Beta Release 2002 08 29 - Actor merged with Object
+==================================================
+- merged Actor primitive into Object primitive
+  - async messages can now be sent to any object using a ":"
+- String 
+  - added file path manipulation methods
+  - removed "byte" method
+- added Docs for Number character tests
+
+Beta Release 2002 08 26 - Linux build fix
+=========================================
+- fix for Makefile on Linux
+
+Beta Release 2002 08 25 - launchPath, fixes
+===========================================
+- fixed operator parse bug
+- added super method for invoking a method on a parent
+- launchPath Lobby slot set on startup
+- added character test Operations to Number primitive
+- added chatacterAt method to String primitive
+
+Beta Release 2002 08 23 - new parser, OpenGL
+============================================
+- rewrote parser
+  - less finicky about whitespace separating tokens
+  - syntax errors now contain line and character info
+  - fixes character escape and empty string bugs
+  - stack traces now include file(if any) and character info
+  - now supports /* */ comments
+- List 
+  - add() now supports multiple arguments
+  - sizeTo() method added
+- cleaned up CLI code
+- OpenGL/GLUT addon (just the basics)
+
+Beta Release 2002 08 17
+=======================
+- added addon libs:
+  - Directory (currently for unix only)
+  - XML parser using expat
+  - MD5 digest
+  - Blowfish encryption
+  - Regular Expressions using gnu regex
+
+Beta Release 2002 08 14
+=======================
+- added bitwise Number operations
+- added LinkedList primitive
+- fixed List sort bug
+
+Beta Release 2002 08 11 - Actors
+================================
+- added concurrency via Actors that use coroutines (this adds some globals)
+
+Beta Release 2002 08 05 - commandLineArguments
+==============================================
+- fixed "-" operator parse bug 
+- cleanup of command line interface code
+  - if debugParser is defined, the cli with show parse info
+- changed 'commandLineArguments' to 'args'
+
+Beta Release 2002 08 04 - perform, stack traces
+===============================================
+- added Object perform(methodName, arg1, ...) method
+- simple message stack traces working
+
+Beta Release 2002 08 03 - multi-state, inlining
+===============================================
+- multi-state safe (no globals)
+- some work on jit support
+- added Number toggle method
+- moved most defined functions to inlined(now not entirely ANSI C)
+
+Beta Release 2002 05 27 - make test, String improvements
+========================================================
+- added "make test" test script and got more tests working
+- fixed bug with scope of break
+- added Nil print, == methods
+- added or, and, == to all primitives
+- String doFile method now takes optional command line arguments
+- added or, and and return as operators so:
+  "return 1" can be used instead of "return(1)" and
+  "a or b or c" works
+- fixed comments on command line interface
+- String split and splitCount methods
+- String asString method now accepts optional format argument
+- removed String prepend method
+- renamed String methods:
+  fromTo -> substring
+  replaceWith -> replace
+  insertAt -> insert
+
+Beta Release 2002 05 26 - init, primitive improvements
+======================================================
+- fixed Map object
+- fixed operator terminating on new line
+- removed the "_"s from the primitive methods
+- added Map hasKey, hasValue methods
+- added String join method
+- added File readLines method
+- added Number % method
+- added Message name and name_ methods
+- setSlot now returns the value so statements like 
+  x = y = 1 are supported
+- finished Message primitive setter methods
+- Objects now call init method after being cloned
+  init's arguments are the same as those sent to clone
+
+Beta Release 2002 05 20 - gc work
+=================================
+- fixed gc bug with literal strings
+- literal strings now stored in Splay tree for speed
+- moved to stack retained gc system so internal
+  IORETAIN(), IORELEASE() calls no longer needed.
+- removed global state and almost all globals are gone
+- Note: still a bug in the Map object
+
+Beta Release 2002 05 14 - Date, File, random, exceptions
+========================================================
+- added Date and File primitives
+- Number random now returns value between 0 and 1
+  - Random method added
+- Updated all errors to proper exceptions
+  - updated error callback to include exception name
+
+Beta Release 2002 05 13 - gc and other fixes
+============================================
+- List clone now makes a shallow copy of the target
+- stack retained values now properly released on exceptions
+- fixed gc bug - now unmark retained values
+- inlined(w/macro) CFunction activation
+- numbers now copied by value instead of reference
+- new Number methods for "inline" operations
+- readded Number ++ and added +=, -=, etc
+- exception stack now marked on gc cycle
+- fixed gc bug with symbol strings
+- fixed bug with parsing operators w/no args
+- added List ==, reverseForeach, at_put_, random, randomize methods
+- List foreach now takes an extra index argument
+- added String asNumber method
+
+Beta Release 2002 05 08 #2 - Message primitive
+==============================================
+- made Message into a primitive 
+- added Block argumentNames and message methods
+- added Object hasSlot(), removeSlot() methods
+- slots can hold Nil values now
+- fixed exception name and compare problems
+- fixed gc problem with messages
+
+Beta Release 2002 05 08 - cleanup
+=================================
+- makefile fix for Io prefixed filenames
+- prefixed all Io specific C names with "Io"
+- finished implementing forward
+- renamed get() and set() to getSlot() and setSlot()
+
+Beta Release 2002 05 07 - exceptions, break, continue, and returns
+==================================================================
+- added exceptions, break, continue, and returns
+- added Object exit and slotNames methods
+- changed "Hash" name to "Map"
+- fixed forward method - default implementation raises exception
+- removed Block code_ method
+- removed Number ++ method
+- removed extra print form CLI
+
+Beta Release 2002 05 06 - foreach, commandLineArguments
+=====================================================
+- support for command line arguments
+  (they are put in List in "commandLineArguments" slot of Lobby)
+- List methods: foreach, sortBy_, do_, swapIndex_withIndex_, reverse 
+- Hash methods: do_, foreach, keys, values
+- fixed enumerating normal Hash
+
+Beta Release 2002 05 02 - operators
+===================================
+- new operator syntax: a = b instead of a =(b), 1 + 2 instead of 1 +(2)
+- string append accepts strings or numbers
+- ".." method for appending strings
+- block code is escaped for printing
+- block "code" and "code_" methods for 
+  inspecting and changing a blocks code
+- unrecognized message to nil raises an error
+- string methods now return new strings
+- fixed enumerating index 0 in PHash.
+- fixed wrong context for evaluating arguments in 
+  Object_setSlot and Object_getSlot
+
+Beta Release 2002 04 21 - performance
+=====================================
+- various fixes, added List primitive
+- moved perform methods into tags
+- performance improvements
+  - block locals caching
+  - object uses perfect hash in single buffer
+  - macros for basic operations
+  - inlined some message send related functions
+- type check using tag name callback compares
+- announced on Self mailing list
+
+Alpha Release 2002 04 11 - control structures and gc
+====================================================
+- basics working
+  - if, while and for
+  - garbage collection
+- released to friends
+
+[Project started 2002 03 07?]

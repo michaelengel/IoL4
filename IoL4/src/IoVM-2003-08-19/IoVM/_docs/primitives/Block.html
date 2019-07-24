@@ -1,0 +1,108 @@
+<HTML>
+<HEAD>
+<TITLE>Block</TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+A {text-decoration: none}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>Block</H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<A NAME="Summary"></A>
+<h2>Summary</h2>
+<ul>
+Blocks are anonymous functions(messages with their own locals object). They are typically used to represent object methods.
+
+</UL>
+
+<A NAME="Methods"></A>
+<h2>Methods</h2>
+<UL>
+
+
+<b>type</b>
+<p>
+Returns the string "Block".
+<br><br><br>
+
+<b>setScope(anObjectOrNil)</b>
+<p>
+If argument is an object, when the block is activated, it will set the proto and self slots of it's locals to the specified object. If Nil, it will set them to the target of the message.
+<br><br><br>
+
+
+<b>scope</b>
+<p>
+Returns the scope used when the block is activated or Nil if the target of the message is the scope.
+<br><br><br>
+
+<b>code</b>
+<p>
+Returns a string containing the decompiled code of the receiver.
+<br><br><br>
+
+<b>argumentNames</b>
+<p>
+Returns a List of strings containing the argument names of the receiver.
+<br><br><br>
+
+<b>setArgumentNames(aListOfStrings)</b>
+<p>
+Sets the receiver's argument names to those specified in aListOfStrings. Returns self.
+<br><br><br>
+
+<b>message</b>
+<p>
+Returns the root message of the receiver.
+<br><br><br>
+
+</UL>
+<h3>Comparison</h3>
+<UL>
+<BR>
+
+
+<b>==(aValue)</b>
+<p>
+Returns the receiver if aValue is identical, nil otherwise.
+<br><br><br>
+
+
+<b>!=(aValue)</b>
+<p>
+Returns the receiver if aValue is not identical, nil otherwise.
+<br><br><br>
+
+</UL>
+<h3>Logical operations</h3>
+<UL>
+<BR>
+
+
+<b>and(aValue)</b>
+<p>
+Returns nil if aValue is nil, self otherwise.
+<br><br><br>
+
+
+<b>or(aValue)</b>
+<p>
+Returns self.
+<br><br><br>
+
+</UL>
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+</html>

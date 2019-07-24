@@ -1,0 +1,327 @@
+/*   Copyright (c) 2003, Steve Dekorte
+ *   All rights reserved. See _BSDLicense.txt.
+ */
+
+#include "IoLexer.h"
+#include "IoToken_parser.h"
+#include "Stack.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+int IoToken_LevelForOp_(char *s)
+{
+  if (!strcmp("?", s))  return 0;
+  if (!strcmp("++", s)) return 0;
+  if (!strcmp("--", s)) return 0;
+  
+  if (!strcmp("*", s))  return 1;
+  if (!strcmp("/", s))  return 1;
+  if (!strcmp("%", s))  return 1;
+  if (!strcmp("^", s))  return 1;
+  
+  if (!strcmp("+", s))  return 2;
+  if (!strcmp("-", s))  return 2;
+  
+  if (!strcmp(">>", s))  return 3;
+  if (!strcmp("<<", s))  return 3;
+   
+  if (!strcmp(">", s))   return 4;
+  if (!strcmp("<", s))   return 4;
+  if (!strcmp("<=", s))  return 4;
+  if (!strcmp(">=", s))  return 4;
+
+  if (!strcmp("==", s))  return 4;
+  if (!strcmp("!=", s))  return 4;
+  
+  if (!strcmp("&", s))   return 5;
+  
+  if (!strcmp("^", s))   return 6;
+  if (!strcmp("..", s))  return 6;
+    
+  if (!strcmp("|", s))   return 7;
+  
+  if (!strcmp("and", s)) return 8;
+  if (!strcmp("&&", s))  return 8;
+  
+  if (!strcmp("or", s))  return 9;
+  if (!strcmp("||", s))  return 9;
+  
+  if (!strcmp("!=", s))  return 10;
+  if (!strcmp("+=", s))  return 10;
+  if (!strcmp("-=", s))  return 10;
+  if (!strcmp("*=", s))  return 10;
+  if (!strcmp("/=", s))  return 10;
+  if (!strcmp("<<=", s)) return 10;
+  if (!strcmp(">>=", s)) return 10;
+  if (!strcmp("&=", s))  return 10;
+  if (!strcmp("|=", s))  return 10;
+  if (!strcmp("%=", s))  return 10;
+  if (!strcmp("=", s))   return 10;
+  if (!strcmp(":=", s))  return 10;
+  if (!strcmp("<-", s))  return 10;
+  if (!strcmp("<->", s)) return 10;
+  if (!strcmp("->", s))  return 10;
+  
+  if (!strcmp("=", s)) return 11;
+  if (!strcmp("return", s)) return 11;
+  if (!strcmp("super", s)) return 11;
+  /*if (!strcmp("local", s)) return 11;*/
+  
+  if (!strcmp(",", s)) return 12;
+  if (!strcmp("(", s)) return 13;
+  if (!strcmp(")", s)) return 14;
+  return -1;
+};
+
+
+int IoToken_shouldBreakFor_(IoToken *self, IoToken *m)
+{ 
+  int i1 = IoToken_LevelForOp_(IoToken_name(self));
+  int i2 = IoToken_LevelForOp_(IoToken_name(m));
+  int r = !(i1 < i2);
+  if (i1 < 0 || i2 < 0) return 0;
+  /*printf("IoToken_shouldBreakFor_('%s', '%s') = %i\n", 
+    IoToken_name(self), IoToken_name(m), r);*/
+  return r;  
+}
+
+
+/* --- parsing ---------------------------------------------------------- */
+
+
+IoToken *IoToken_popFromLexer_andSetParent_(IoLexer *lexer, IoToken *parent)
+{
+  if (!IoLexer_top(lexer)) return 0x0;
+  if (IoLexer_topType(lexer) == COMMA_TOKEN || 
+      IoLexer_topType(lexer) == TERMINATOR_TOKEN || 
+      IoLexer_topType(lexer) == OPENPAREN_TOKEN ||
+      IoLexer_topType(lexer) == CLOSEPAREN_TOKEN ||
+      IoLexer_topType(lexer) == COMMENT_TOKEN )
+  { return 0x0; }
+  
+  {
+    IoToken *p = IoLexer_pop(lexer);
+    p->parent = parent;
+    return p;
+  }
+}
+
+IoToken *IoToken_root(IoToken *self)
+{
+  if (!self->parent) return self;
+  return IoToken_root(self->parent);
+}
+
+void IoToken_error_(IoToken *self, char *error)
+{ self->error = strcpy(realloc(self->error, strlen(error)+1), error); }
+
+char *IoToken_error(IoToken *self) { return self->error ? self->error : (char *)""; }
+
+/* --- checks --- */
+
+int IoToken_hasArg_(IoToken *self, IoToken *t)   
+{ return (List_indexOf_(self->args, t) != -1); } 
+
+int IoToken_isOperator(IoToken *self)
+{
+  if (self->type == OPERATOR_TOKEN) return 1;
+  if (IoToken_LevelForOp_(IoToken_name(self))!=-1) return 1;
+  return 0;
+}
+
+IoToken *IoToken_lastOperator(IoToken *self, IoLexer *lexer)
+{
+  if (!self) return 0x0;
+  if (IoToken_isOperator(self)) return self;
+  if (self->parent && !self->parent->openParen)
+  {
+    if (IoToken_hasArg_(self->parent, self) || self->parent->attached == self)
+    return IoToken_lastOperator(self->parent, lexer); 
+  }
+  return 0x0;
+}
+
+IoToken *IoToken_lastOperatorToBreakOn(IoToken *self, IoLexer *lexer)
+{
+  IoToken *op = IoToken_lastOperator(self->parent, lexer);
+  while (op && IoToken_shouldBreakFor_(self, op))
+  {
+    IoToken *nextOp = IoToken_lastOperator(op->parent, lexer);
+    if (!nextOp || !IoToken_shouldBreakFor_(self, nextOp)) 
+    { return op; }
+    op = nextOp;
+  }
+  return 0x0;
+}
+
+IoToken *IoToken_lastParen(IoToken *self)
+{
+  if (!self) return 0x0;
+  if (self->parent)
+  {
+    if (self->openParen) return self;
+    if (self->parent->next != self)
+    return IoToken_lastParen(self->parent); 
+  }
+  return 0x0;
+}
+
+/* --- parsing --- */
+
+void IoToken_read(IoToken *self, IoLexer *lexer, IoToken **error)
+{
+  /*printf("parsing token '%s' parent '%s'\n", self->name, self->parent ? self->parent->name : "NULL");*/
+  IoToken_parseArgs(self, lexer, error); 
+  
+  /* special syntax for assignment - change 'a =(1)' to 'setSlot("a", 1)' */
+  if (IoToken_nameIs_(self, "=") || IoToken_nameIs_(self, ":="))
+  {
+    int isEqual = IoToken_nameIs_(self, "=");
+    if (!List_count(self->args))
+    { IoToken_error_(self, "no tokens right of ="); *error = self; return; }
+    
+    if ((!self->parent) || self->parent->attached != self)
+    { IoToken_error_(self, "no tokens left of ="); *error = self; return; }
+    
+    /*printf("%s=\n", IoToken_name(self->parent));*/
+    IoToken_quoteName_(self, IoToken_name(self->parent));
+    self->type = MONOQUOTE_TOKEN;
+    if (isEqual) 
+    { IoToken_name_(self->parent, "setSlot"); } 
+    else 
+    { IoToken_name_(self->parent, ":="); }
+    self->parent->type = IDENTIFIER_TOKEN;
+    self->parent->attached = 0x0;
+    List_add_(self->parent->args, self);
+    List_addList_(self->parent->args, self->args);
+    List_clear(self->args);
+  }
+  
+  /* handle operator precedence */
+
+  else if (IoToken_isOperator(self) && !self->openParen && 
+     self->parent && self->parent->attached == self)
+  {
+    IoToken *lop = IoToken_lastOperatorToBreakOn(self, lexer);
+    if (lop && lop != self->parent)
+    {
+      if (lop->attached)
+      { 
+        self->attached = lop->attached; 
+      }
+      /*printf("attaching %s (parent %s) to %s (parent %s)\n", self->name, self->parent->name, lop->name, lop->parent->name);*/
+      lop->attached = self;
+      self->parent->attached = 0x0;
+      /*printf("after op reorg: "); IoToken_printParsed(IoToken_root(self)); printf("\n");*/
+      return;
+    }
+  }
+
+  if (*error) return;
+
+  if (!self->attached) IoToken_parseAttached(self, lexer, error); if (*error) return;  
+
+
+  if (!self->parent || self->parent->next == self || 
+    (IoToken_hasArg_(self->parent, self) && self->parent->openParen))
+  { 
+    /*printf("next stack: "); IoToken_printParseStack(self); printf("\n");*/
+    IoToken_parseNext(self, lexer, error); 
+  }
+}
+
+void IoToken_parseArgs(IoToken *self, IoLexer *lexer, IoToken **error)
+{
+  if (!IoLexer_top(lexer)) 
+  { IoToken_error_(self, "EOF"); *error = self; return; }
+  
+  if (IoLexer_topType(lexer) == TERMINATOR_TOKEN) { return; }
+  
+  if (IoLexer_topType(lexer) == OPENPAREN_TOKEN) 
+  {
+    IoLexer_pop(lexer);
+    self->openParen = 1;
+    for (;;) 
+    {
+      IoToken_parseArg(self, lexer, error); if (*error) return;
+      if (IoLexer_topType(lexer) == CLOSEPAREN_TOKEN) { IoLexer_pop(lexer); return; }
+      if (IoLexer_topType(lexer) == COMMA_TOKEN) { IoLexer_pop(lexer); continue; }
+      IoToken_error_(self, "unable to properly parse args in ()s"); 
+      return;
+    }
+  }
+  else if (IoToken_isOperator(self))
+  {
+    /* binary message */
+    /* need to check precedence first */
+    IoToken_parseArg(self, lexer, error);
+  }
+}
+
+void IoToken_parseArg(IoToken *self, IoLexer *lexer, IoToken **error)
+{
+  IoToken *p = IoToken_popFromLexer_andSetParent_(lexer, self);
+  if (p)
+  {
+    List_add_(self->args, p);
+    IoToken_read(p, lexer, error);
+  }
+}
+
+void IoToken_parseAttached(IoToken *self, IoLexer *lexer, IoToken **error)
+{
+  self->attached = IoToken_popFromLexer_andSetParent_(lexer, self);
+  if (self->attached) IoToken_read(self->attached, lexer, error);
+}
+
+void IoToken_parseNext(IoToken *self, IoLexer *lexer, IoToken **error)
+{
+  if (IoLexer_topType(lexer) != TERMINATOR_TOKEN)  { return; }
+  IoLexer_pop(lexer);
+  if (IoLexer_topType(lexer) == COMMA_TOKEN
+   || IoLexer_topType(lexer) == CLOSEPAREN_TOKEN) { return; }
+  self->next = IoToken_popFromLexer_andSetParent_(lexer, self);
+  if (self->next) IoToken_read(self->next, lexer, error);
+}
+
+/* ------------------------------------------------------- */
+
+void IoToken_printParsed(IoToken *self)
+{
+  /*printf("'%s'", self->name);*/
+  printf("%s", IoToken_name(self));
+  if (List_count(self->args))
+  {
+    int i;
+    printf("(");
+    for (i = 0; i < List_count(self->args); i++)
+    {
+      IoToken *p = List_at_(self->args, i);
+      IoToken_printParsed(p);
+      if (i < List_count(self->args)-1)  printf(", ");
+    }
+    printf(")");
+  }
+  if (self->attached)
+  {
+    printf(" ");
+    IoToken_printParsed(self->attached);
+  }
+  if (self->next)
+  {
+    printf(";\n");
+    if (IoToken_nameIs_(self, "setSlot")) printf("\n");
+    IoToken_printParsed(self->next);
+  }
+}
+
+void IoToken_printParseStack(IoToken *self)
+{
+  if (!self->parent) { printf("%s", IoToken_name(self)); return; }
+  IoToken_printParseStack(self->parent);
+  printf(" -> %s", IoToken_name(self));
+}
+
+

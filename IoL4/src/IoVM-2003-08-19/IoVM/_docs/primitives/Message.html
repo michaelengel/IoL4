@@ -1,0 +1,118 @@
+<HTML>
+<HEAD>
+<TITLE>Message</TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+A {text-decoration: none}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>Message</H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<A NAME="Summary"></A>
+<h2>Summary</h2>
+<ul>
+A Message object encapsulates the action of a message send. Blocks are composed of a Message and its children.
+
+<p><b>Terminology</b><p>
+
+Example:
+
+<PRE>  foo bar(moo goo); mush mouth</PRE>
+
+In the above example:
+<UL>
+<LI> "foo" is the "name" of the first message
+<LI> the bar message is "attached" to the foo message
+<LI> the moo message is the first argument of the bar message
+<LI> the goo message is attached the moo message
+<LI> the mush message is the "next" message of the foo message
+<LI> the mouth message is attached the mush message
+</UL>
+<p>
+In Diagram form:<BR>
+<img src="MessageTree.png">
+<p>
+<b>Important:</b> Modifying the message tree of a block currently in use may cause a crash if a garbage collection cycle occurs. If the implementation were changed to retain every called message, this could be avoided. But the cost to performance seems to outweigh the need to cover this case for now.
+</UL>
+
+
+<A NAME="Methods"></A>
+<h2>Methods</h2>
+<UL>
+
+<b>clone</b>
+<p>
+Returns a Message that is a deep copy of the receiver.
+<br><br><br>
+
+<b>type</b>
+<p>
+Returns a String with the value "Message".
+<br><br><br>
+
+<b>name</b>
+<p>
+Returns the name of the receiver.
+<br><br><br>
+
+<b>setName(aMessage)</b>
+<p>
+Sets the name of the receiver. Returns self. 
+<br><br><br>
+
+<b>nextMessage</b>
+<p>
+Returns the next message in the message chain or Nil if there is no next message.
+<br><br><br>
+
+<b>setNextMessage(aMessage)</b>
+<p>
+Sets the next message in the message chain to a deep copy of aMessage or it removes the next message if aMessage is Nil. Raises an exception if aMessage is already a 
+<br><br><br>
+
+<b>attachedMessage</b>
+<p>
+Returns the message attached to the receiver or Nil if there is no message attached.
+<br><br><br>
+
+<b>setAttachedMessage(aMessage)</b>
+<p>
+Sets the message attached the message chain to a deep copy of aMessage. If aMessage is Nil, it removes any attached message.
+<br><br><br>
+
+<b>arguments</b>
+<p>
+Returns a list of the message objects that act as the receiver's arguments. Modifying this list will not alter the actual list of arguments. Use the arguments_() method to do that.
+<br><br><br>
+
+<b>setArguments(aListOfMessages)</b>
+<p>
+Sets the arguments of the receiver to deep copies of those contained in aListOfMessages.
+<br><br><br>
+
+<b>doInContext(anObject)</b>
+<p>
+Evaluates the receiver in the context of anObject. (Deprecated - use Object doMessage(aMessage) instead).
+<br><br><br>
+
+
+<b>fromString(aString)</b>
+<p>
+Returns a new Message object for the compiled(but not executed) result of aString.
+<br><br><br>
+</UL>
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+</html>

@@ -1,0 +1,143 @@
+<HTML>
+<HEAD>
+<TITLE> Map </TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+A {text-decoration: none}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>Map</H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<A NAME="Summary"></A>
+<h2>Summary</h2>
+<ul>
+A key/value dictionary appropriate for holding large key/value collections.<p>
+</UL>
+
+<A NAME="Methods"></A>
+<h2>Methods</h2>
+<UL>
+
+<b>clone</b>
+<p>
+Returns an new, empty Map object.
+<br><br><br>
+
+
+<b>type</b>
+<p>
+Returns the string "Map".
+<br><br><br>
+
+</UL>
+<h3>Accessors</h3>
+<UL>
+<BR>
+
+<b>at(keyString)</b>
+<p>
+Returns the value for the key keyString. Returns nil if the key is absent.
+<br><br><br>
+
+<b>count</b>
+<p>
+Returns the number of key/value pairs in the receiver.
+<br><br><br>
+
+<b>keys</b>
+<p>
+Returns a list containing all the keys in the receiver.
+<br><br><br>
+
+
+<b>values</b>
+<p>
+Returns a list containing all the values in the receiver.
+<br><br><br>
+
+</UL>
+<h3>Modifiers</h3>
+<UL>
+<BR>
+
+
+<b>atPut(keyString, aValue)</b>
+<p>
+Inserts/sets aValue with the key keyString.
+<br><br><br>
+
+<b>remove(keyString)</b>
+<p>
+Removes the specified keyString if present. Returns self.
+<br><br><br>
+
+<b>empty</b>
+<p>
+Removes all keys from the receiver.
+<br><br><br>
+
+
+</UL>
+<h3>Logical Operations</h3>
+<UL>
+<BR>
+
+<b>and(aValue)</b>
+<p>
+Returns nil if aValue is nil, self otherwise.
+<br><br><br>
+
+
+<b>or(aValue)</b>
+<p>
+Returns self.
+<br><br><br>
+
+
+</UL>
+<h3>Loops</h3>
+<UL>
+<BR>
+
+<b>doBlock(aBlock)</b>
+<p>
+Calls aBlock with each key  and value as the first two arguments.<BR> Example usage:
+
+<PRE>  aMap doBlock(block(k, v, 
+    write(k, " = ", v, "\n")
+  ))</PRE>
+<br>
+
+<b>foreach(&lt;keySlot&gt;, &lt;valueSlot&gt;, &lt;aMessage&gt;)</b>
+<p>
+For each key value pair, sets the locals keySlot to the key and valueSlot to the value and executes aMessage.<BR> Example usage:
+
+<PRE>  aMap foreach(k, v, 
+    write(k, " = ", v, "\n")
+  )</PRE>
+
+Example use with a block:
+
+<PRE>  myBlock = block(k, v, write(k, " = ", v, "\n")) 
+  aMap foreach(k, v, myBlock(k, v))</PRE>
+
+foreach() will should perform better than doBlock() unless you specifically need to execute a block.
+<br><br><br>
+
+
+</UL>
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+</html>

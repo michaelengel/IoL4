@@ -1,0 +1,97 @@
+# ========================================================
+# Makefile for Io programming language
+# ========================================================
+
+WARN := -Wall -Winline
+# -Wstrict-prototypes
+# remove "-no-cpp-precomp" on windows
+
+# if your system doesn't have (or need) ranlib, change "ranlib" to "true".
+# on some systems, "ar s" does it.
+RANLIB := ranlib
+#RANLIB := ar s
+#RANLIB := true
+
+# this should work in all unix systems.
+AR := ar rcu
+TARGET := all
+
+PLATFORM := $(shell uname -sp)
+
+OP :=  -Os -g -fkeep-inline-functions
+
+ifeq ($(PLATFORM), FreeBSD alpha)
+  OP := -O -g -fkeep-inline-functions
+endif
+
+ifeq ($(PLATFORM), Darwin powerpc)
+  OP := -Os 
+#-fno-function-cse -fkeep-inline-functions -fno-peephole2
+endif
+
+
+# ========================================================
+
+LIBS := -lm
+
+CFLAGS :=  $(OP) -D$(TARGET) $(WARN) -I. -Ibase 
+
+BASIC_OBJS := \
+	IoExceptionCatch.o \
+	IoState.o \
+	IoObject.o \
+	IoTag.o \
+	IoNil.o \
+	IoNumber.o \
+	IoString.o \
+	IoList.o \
+	IoLinkedList.o \
+	IoMap.o \
+	IoBuffer.o \
+	IoMessage.o \
+	IoMessage_parser.o \
+	IoBlock.o \
+	IoCFunction.o \
+	IoDate.o \
+	IoDuration.o \
+	IoFile.o \
+	IoWeakLink.o \
+	IoCoroutine.o \
+	IoObject_actor.o \
+	IoFuture.o \
+	IoObjectGroup.o \
+	parser/IoToken.o \
+	parser/IoToken_parser.o \
+	parser/IoLexer.o 
+
+FULL_OBJS := main.o
+# ========================================================
+
+LIB := _libs/libIoVM.a
+
+all:
+	if test -d $(LIB); then rm $(LIB); fi; 
+	cd base; $(MAKE); cd ..
+	$(MAKE) $(LIB)
+	$(MAKE) main.o
+	$(CC) -o io main.o -L_libs -lIoVM -Lbase -lIoBase $(LIBS)
+	cp *.h _include
+	cp base/*.h _include/base
+
+$(LIB): $(BASIC_OBJS) base/*.o
+	$(AR) $@ $(BASIC_OBJS) base/*.o
+	$(RANLIB) $@
+
+clean:
+	rm -f $(BASIC_OBJS) $(LIB) io main.o
+	cd base; $(MAKE) clean;
+	rm -f _libs/*.a
+	rm -f _include/*.h
+	rm -f _include/base/*.h
+
+test:
+	./io _tests/test.io
+
+
+configure:
+	echo "IoVM: nothing to configure"

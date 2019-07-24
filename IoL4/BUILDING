@@ -1,0 +1,20 @@
+A quick and dirty guide to building IoOS/L4
+Kentaro A. Kurahone (kurahone@sigusr1.org)
+
+Since right now I've only used this on ia32, the following instructions assume
+that you are building on x86.
+
+Building:
+ * Type "gmake". (I'm assuming that gmake == GNU make on your system).
+ * This will go through the L4 configure process also.  Remember to enable
+   the "Keyboard" option for the kernel debugger if you are not using a 
+   serial line.
+
+Booting:
+ * Copy the files in ./bin to somewhere that GRUB can see them.
+ * Boot with the following series of commands. (Add drive/paths as appropriate).
+     kernel /boot/l4/kickstart
+     module /boot/l4/ia32-kernel
+     module /boot/l4/sigma0
+     module /boot/l4/io
+     boot

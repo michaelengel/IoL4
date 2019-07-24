@@ -1,0 +1,876 @@
+<HTML>
+<HEAD>
+<TITLE>Io Reference Manual</TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>Io Reference Manual</H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<UL>
+<LI><A HREF="#Introduction">Introduction</A>
+<LI><A HREF="#Getting Started">Getting Started</A>
+<LI><A HREF="#Language">Language</A>
+<LI><A HREF="#Primitives">Primitives</A>
+<LI><A HREF="#Concurrency">Concurrency</A>
+<LI><A HREF="#Embedding">Embedding</A>
+<LI><A HREF="#Binding">Binding</A>
+<LI><A HREF="#Notes">Notes</A>
+</UL>
+
+
+<A NAME="Introduction"></A>
+<h2>Introduction</h2>
+<BR>
+<UL>
+<font face="times"><i>Less is more.<BR>
+- Ludwig Mies van der Rohe, 1947</i></font>
+</UL>
+<p>
+<ul>
+Io is a programming language with a focus on being very small and simple. The ideas in Io are mostly inspired by Smalltalk(all values are objects), Act1(differential protos, inheritance through delegation, actors) and its decendants such as Self and NewtonScript. As well as Lua(use of tags in the implementation).
+<p>
+Io is open sourced under a BSD license.
+<p>
+
+<b>Features</b>
+<UL>
+<li> small (~8K lines)
+<li> pure object language 
+<li> reasonably fast (comparable to Python, Perl)
+<li> differential prototype-based object model
+<li> untyped
+<li> incremental garbage collector(tri-color, write barrier)
+<li> exceptions, break, continue and returns supported
+<li> ANSI C implementation (except for inline directive)
+<li> embeddable
+<LI> multi-state (multiple independent VMs can run in the same application)
+<LI> coroutines/light weight threads
+</UL>
+
+<p>
+<b>What's Different</b>
+<UL>
+<LI> completely message-oriented, even assignments
+<LI> modifiable message trees instead of bytecodes
+<LI> programmable with C API
+<LI> decompilable methods
+<LI> C implementation written in OO style
+<LI> concurrency via actors
+</UL>
+<p>
+
+<b>Goals</b>
+<p>
+Io's goal is to be a small, simple language that is well suited for embedded use in interactive visual programming systems(where everything is modifiable at runtime). 
+<p>
+To this end, Io blocks are represented as message tree data structures instead of byte codes. This makes them easier to inspect and modify at runtime, and to couple the editing of blocks to a visual interface. This sounds like it would be slow, but it actually seems to perform as well as popular bytecode based scripting languages for many tasks and better for some(such as method calls).<p> 
+<p>
+Io's core language and primitives should compile on any platform with an ANSI C compiler. Concurrency features are only supported on platforms for which coroutine support has been added(usually a few lines of code per platform).
+<p>
+
+<p>
+
+<b>Credits</b>
+<p>
+Thanks for code go to:
+<UL>
+<LI> Edgar Toernig - original coroutine and dns packet code
+<LI> Mike Austin - GL, textured font, cygwin code, bug reports, ideas, hosting
+<LI> Daniel A. Koepke - tons of fixes, additions and suggestions
+<LI> Edwin Zacharias - curses bindings 
+<LI> Chris Double - Symbian code, lots of portability suggestions
+<LI> Kevin Greer - Linux build testing, sample code, suggestions
+<LI> Daniel Vollmer - MS Visual C coroutines and port
+<LI> Roberto Amorim - Windows related and other fixes
+<LI> Kentaro A. Kurahone - 64bit clean, FreeBSD on Alpha coroutines
+<LI> Faried Nawaz - FreeBSD/NetBSD coroutines 
+<LI> Sebastien Pierre - GNUstep port of ObjcBridge
+<LI> Sean Perry - Date fromString code, suggestions, makefile and docs fixes
+<LI> PowerDog - portable strptime() 
+<LI> Daniel Sleator - splay tree code
+<LI> Also see individual bindings for more credits
+<LI> If I've forgotten to mention you, please let me know!
+</UL>
+<p>
+Also thanks to:
+<UL>
+<LI> Dru Nelson - advice, inspired Io by writing <a href="http://www.redwoodsoft.com/cel/">Cel</a>
+<LI> Zachary Bir - OSX testing, suggestions, hosting
+<LI> Max Rudberg - IoDesktop "Milk" theme
+<LI> Bitstream - Vers font
+<LI> UCS Font project - "Free" unicode font
+<LI> Chuck Esterbrook - comments, suggestions
+<LI> Jim Mathies - initial testing, comments
+<LI> Jack Herrington - initial testing, comments
+<LI> Jecel Assumpcao Jr - comments
+<LI> James McCartney - generator, gc suggestions
+<LI> Benedikt Rosenau - bug reports
+<LI> David Ungar and Brian Rice - encouraged use of lexical blocks
+<LI> Many others for help, fixes, feedback and encouragement
+</UL>
+<p>
+
+
+<b>The Future</b>
+<UL>
+<LI> smaller, faster, simpler
+<LI> more just-in-time compiler work
+<LI> a separate visual programming interface
+</UL>
+
+</UL>
+
+
+
+<A NAME="Getting Started"></A>
+<h2>Getting Started</h2>
+<UL>
+
+<A NAME="Compiling"></A>
+<b>Compiling</b>
+<p>
+Running "make" in the IOVM source directory will compile the Io VM 
+executable("io") and library("libIoVM.a"). It's ANSI C, so it should compile on most any platform though Coroutines are only supported on certain platforms. Io is known to compile and support coroutines on:
+<UL>
+<LI> OSX on PPC
+<LI> Linux on Intel and ARM
+<LI> BSD on Intel and Alpha
+<LI> Win32 on Intel (using Cygwin, Mingw or Visual C)
+<LI> Symbian
+</UL>
+<p>
+Running make in the directory above it will compile the complete distribution with addons. 
+ 
+<p>
+
+<A NAME="Installing"></A>
+<b>Installing</b>
+<p>
+Io doesn't need to be put in a particular directory or to have any environment variables set.<p>
+
+<A NAME="Running"></A>
+<b>Running</b>
+<p>
+There are some test scripts in the tests/ directory. You can run them from the command line like this:
+<PRE>  ./io tests/HelloWorld.io
+  ./io tests/Account.io
+  ./io tests/Conditions.io
+  ./io tests/Loops.io
+</PRE>
+
+Command line arguments after the file name are put into a List object and stored in the Lobby's "args" slot. Here's an example of one way to print them out:
+
+<PRE>  Lobby args foreach(k, v, write("'", v, "'\n"))
+</PRE>
+
+<p>
+There is no main() function or object that gets executed first in Io. Scripts are executed when compiled.
+<p>
+
+Also, the Lobby slot "launchPath" is set to the location on the initial source file that is executed.
+
+<p>
+<A NAME="CLI"></A>
+<b>Command Line Interface</b>
+<P>
+
+Running:
+<PRE>  ./io
+</PRE>
+with no arguments will open the Io interpreter prompt. You can evaluate code by entering it directly. Example:
+
+<PRE>  Io> "Hello world!" print
+  Hello world!
+</PRE>
+
+Statements are evaluated in the context of the Lobby:
+<PRE>  Io> print
+  <i>[printout of lobby contents]</i>
+</PRE>
+
+</UL>
+
+
+<A NAME="Language"></A>
+<h2>The Language</h2>
+<UL>
+
+<A NAME="Namespace"></A>
+<b>Namespace</b>
+<p>
+Objects in Io are key/value pair dictionaries. Each key/value pair is called a slot. A slot's key is a string and its value can be any type of object. Methods are simply slots whose value is set to a method(an anonymous function) or a CFunction primitive. Instance and/or "class" variables are slots with other types of values. The root object in the Io namespace is called the Lobby.
+<p>
+
+<A NAME="Syntax"></A>
+<b>Syntax</b>
+<p>
+There are 2 syntax structures in Io. Both are messages. The first is:
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;<i>&lt;message name&gt; ( &lt;arg1&gt;, &lt;arg2&gt;, ...) &lt;attached message, new line or semicolon&gt; </i>
+<p>
+The parentheses are optional if there are no arguments. The semicolon
+is optional. If a semicolon or a return is present, it ends the message chain.
+If not, it means: "use the result on the left as the target of the message on the right."<BR>
+Example:
+
+<PRE>  Dog fetch(stick)</PRE>
+
+Every statement is an expression in Io - that is, every statement returns a value.
+<p>
+<b>Operators</b>
+<p>
+The other message syntax is for operators. An operator is just a method whose name contains no alphanumeric characters(other than ":", "_", '"' or ".") or is one of the following words: "or", "and", "return".
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;<i>&lt;operator message name&gt; &lt;argument&gt; &lt;another operator, new line or semicolon&gt;</i>
+<p>
+
+Example:
+
+<PRE>  1 + 2</PRE>
+
+This just gets compiled into the normal message:
+
+<PRE>  1 +(2)</PRE>
+
+Which is the form you can use if you need to do grouping:
+
+<PRE>  1 +(2 * 4)</PRE>
+
+Standard operators follow C's precedence order, so:
+
+<PRE>  1 + 2 * 3 + 4</PRE>
+
+Is parsed as:
+
+<PRE> 1 +(2 *(3)) +(4)</PRE>
+
+User defined operators (that don't have a standard operator name) are performed left to right. 
+
+<p>
+<b>Numbers</b>
+<p>
+The following are valid number formats:
+
+<PRE>
+   123
+   123.456
+   0.456
+   .456
+   123e-2
+   123e2
+   123.456e-2
+   123.456e2
+</PRE>
+
+Hex numbers are also supported (in any casing):
+
+<PRE>
+   0x0
+   0x0F
+   0XeE
+</PRE>
+
+<p>
+<b>Strings</b>
+<p>
+
+Strings can be defined surrounded by a single set of double quotes with escaped quotes(and other escape charaters) within. For strings with no escaped characters and/or spanning many lines, triple double quotes can be used. Examples:
+
+<PRE>
+  s = "this is a \"test\".\nThis is only a test."
+  s = """this is a "test".
+This is only a test."""
+</PRE>
+
+
+<p>
+<b>The ? operator</b>
+<p>
+Sometimes it's desirable to conditionally call a method only if it exists(to avoid raising an exception). Example:
+<PRE>  if(obj hasSlot("foo"), obj foo)
+</PRE>
+
+Putting a "?" before a message has the same effect:
+<PRE>  obj ?foo
+</PRE>
+<b>Assignment</b>
+<p>
+An assignment is just an operator message that gets compiled into the appropriate setSlot() call. Example:
+
+<PRE>  Dog = Object clone</PRE>
+
+gets compiled to:
+
+<PRE>  setSlot("Dog", Object clone)</PRE>
+
+Here, the "setSlot" message gets sent to the locals object which is the default target. 
+
+<p>
+<b>Conditions</b>
+<p>
+The Lobby contains the condition and loop methods. A condition looks like:
+
+<PRE>  <i>if(&lt;condition&gt;, &lt;do message&gt;, &lt;else do message&gt;)</i></PRE>
+
+Example:
+
+<PRE>  if(a == 10, "a is 10" print)</PRE>
+
+The else argument is optional. The condition is considered true if the condition message returns a non-nil value and false otherwise. 
+<p>
+The result of the evaluated message is returned, so:
+
+<PRE>  if(y &lt; 10, x = y, x = 0)</PRE>
+
+is the same as:
+
+<PRE>  x = if(y &lt; 10, y, 0)</PRE>
+
+<p>
+Conditions can also be used in this form(though not as efficiently):
+
+
+<PRE>  if(y &lt; 10) then (x = y) else (x = 2)</PRE>
+
+Else-if is also supported:
+
+<PRE>  if(y &lt; 10) then (x = y) elseif (y == 11) then (x = 0) else (x = 2)</PRE>
+
+<p>
+<b>Loops</b>
+<p>
+Like conditions, loops are just messages. <BR>
+while() takes the arguments:
+
+<PRE>  <i>while(&lt;condition&gt;, &lt;do message&gt;)</i></PRE>
+
+Example:
+
+<PRE>  while(a &lt; 10, 
+    a print
+    a ++
+  )</PRE>
+
+for() takes the arguments:
+
+<PRE>  <i>for(&lt;counter&gt;, &lt;start&gt;, &lt;end&gt;, &lt;do message&gt;)</i></PRE>
+
+The start and end messages are only evaluated once, when the loop starts.<BR>
+Example:
+
+<PRE>  for(a, 0, 10, 
+    a print
+  )</PRE> 
+
+To reverse the order of the loop, just reverse the start and end values:
+
+<PRE>  for(a, 10, 0, a print)</PRE> 
+
+Note: the first value will be the first value of the loop variable and the last will be the last value on the final pass through the loop. So a loop of 1 to 10 will loop 10 times and a loop of 0 to 10 will loop 11 times.
+<p>
+Example of using a block in a loop:
+
+<PRE>  test = method(v, v print)
+  for(i, 1, 10, test(i))
+</PRE>
+
+<b>Break and continue</b>
+<p>
+The flow control operations break and continue are supported in loops. For example:
+
+<PRE>  for(i, 1, 10, 
+    if(i == 3, continue)
+    if(i == 7, break)
+    i print
+  )</PRE>
+
+Would print:
+
+<PRE>  12456</PRE>
+
+<p>
+<h3>Objects</h3>
+<p>
+<b>Instantiation</b>
+<p>
+To create a new instance of an object, just call its "clone" method. Example:
+
+<PRE>  me = Person clone</PRE>
+
+To add an instance variable or method, simply set it:
+
+<PRE>  myDog name = "rover"
+  myDog sit = method("I'm sitting\n" print)
+</PRE>
+
+When an object is cloned, its "init" slot will be called if it has one. 
+<p>
+
+<b>Inheritance</b>
+<p>
+Since there are no classes, there's no difference between a subclass and an instance. Example of creating a "subclass":
+
+<PRE>  Io> Dog = Object clone
+
+  Io> Dog
+  Object_0x4a7c0:
+  (
+    proto = Object 0x4a540
+  )
+</PRE>
+
+The above code sets the Lobby slot "Dog" to a clone of the Object object. Notice it only contains a proto slot. Dog is now essentially a subclass of Object. Instance variables and methods are inherited from the proto. If a slot is set, it creates a new slot in our object instead of changing the proto:
+
+<PRE>  Io> Dog color = "red"
+  Io> Dog
+  Object_0x4a7c0:
+  (
+    proto = Object_0x4a540
+    color = String_0x54300 "red"
+  )
+</PRE>
+<p>
+
+
+<p>
+<b>Multiple Inheritance</b>
+<p>
+
+An object can also delegate messages though it's "parent" slot. When responding to a message, the lookup mechanism first searches the proto chain and then looks up the same chain for a "parent" slot and if found, forwards the message to the object in it. While the proto slot must point to an Object primitive, parent slots can point to any primitive type, such as Numbers or Strings.
+
+
+<p>
+<b>Forwarding</b>
+<p>
+
+If an object doesn't respond to a message, it will invoke its "forward" method if it has one. The forward method is called with the name of the message and it's arguments:
+
+<PRE>  forward(methodName, &lt;arg1&gt;, &lt;arg2&gt;, ...)</PRE>
+
+
+<p>
+<b>Super</b>
+<p>
+
+Sometimes it's necessary to send a message directly to a proto. To do this, the super operator is used. Example:
+
+<PRE>  Dog bark = method("woof!" print)
+
+  myDog = Dog clone
+  myDog bark = method(
+    "ruf!" print
+    super bark
+  }
+</PRE>
+
+<p>
+<b>Locals</b>
+<p>
+The first message in a block/method has its target set to the block locals. The locals object has its "proto" and "self" slots set to the target object of the message. So slot lookups look in the locals first, then get passed to the target object and then to its proto, etc until reaching the Lobby. In this way, an assignment with no target goes to the locals first:
+
+<PRE>  a = 10</PRE>
+
+creates an "a" slot in the locals object and sets its value to 10. To set a slot in the target, get its handle by referencing the "self" slot of the locals first:
+
+<PRE>  self a = 10</PRE>
+
+sets the "a" slot in the target.
+
+<p><h3>Methods</h3><p>
+A method is an anonymous function which, when called creates an Object to store it's locals and sets it's proto and self slots to the target of the message. The Lobby method method() can be used to create methods. Example:
+
+<PRE>  method(2 + 2 print)</PRE>
+
+Using a method in an object example:
+<PRE>  Dog = Object clone
+  Dog bark = method("woof!" print)
+</PRE>
+
+The above code creates a new "subclass" of Object named Dog and adds a bark slot containing a block that prints "woof!". Example of calling this method:
+<p>
+<PRE>  Dog bark</PRE>
+<p>
+The default return value of a block is the return value of its last message.
+<p>
+
+<p><b>Blocks</b><p>
+A block is the same as a method except it is lexically scoped. That is, variable lookups continue in the context of where the block was created instead of the target of the message which activated the block. A block can be created using the Object method block(). Example:
+<p>
+<PRE>  b = block(a, a + b)
+</PRE>
+<p>
+
+<p><b>Blocks vs. Methods</b><p>
+
+This is sometimes a source of confusion so it's worth explaining in detail. Both methods and blocks create an object to hold their locals when they are called. What separates a method from a block is what the "proto" and "self" slots of that locals object is set to. In a method, those slots are set to the target of the message. In a block, they're set to the locals object where the block was created. So a failed variable lookup in a block's locals continue in the locals where it was created. And a failed variable lookup in a method's locals continue in the object to which the message that activated it was sent.
+<p>
+
+<b>Arguments</b>
+<p>
+Methods can also be defined to take arguments. Example:
+
+<PRE>  add = method(a, b, a + b)</PRE>
+
+The general form is:
+
+<PRE>  <i>method(&lt;arg name 0&gt;, &lt;arg name 1&gt;, ..., &lt;do message&gt;)</i></PRE>
+
+<b>Variable Arguments</b>
+<p>
+The thisMessage slot that is preset(see next section) in locals can be used to access the unevaluated argument messages. Example:
+
+<PRE>  myif = method(
+    if (sender doMessage(thisMessage argAt(0)), sender doMessage(thisMessage argAt(0)), sender doMessage(thisMessage argAt(0)))
+  )
+
+  myif(foo == bar, write("true\n"), write("false\n"))
+</PRE>
+
+The doMessage() method evaluates the argument in the context of the receiver.
+
+<p>
+<b>Preset Locals</b>
+<p>
+The following local variables are set when a method is activated:
+<p>
+<table cellspacing=0 cellpadding=0 border=0>
+<tr><td bgcolor=#aaaaaa>
+<table cellspacing=1 cellpadding=3 border=0>
+<tr><td bgcolor=white align= center >&nbsp; self   &nbsp;</td><td bgcolor=white>&nbsp; the current object </td></tr>
+<tr><td bgcolor=white align= center >&nbsp; proto  &nbsp;</td><td bgcolor=white>&nbsp; the current object </td></tr>
+<tr><td bgcolor=white align= center >&nbsp; sender &nbsp;</td><td bgcolor=white>&nbsp; the local variables object of the caller &nbsp;</td></tr>
+<tr><td bgcolor=white align= center >&nbsp; thisBlock &nbsp;</td><td bgcolor=white>&nbsp; the current block </td></tr>
+<tr><td bgcolor=white align= center >&nbsp; thisMessage &nbsp;</td><td bgcolor=white>&nbsp; the message used to call the method </td></tr>
+</table>
+</tr></td>
+</table>
+<p>
+The following local variables are set when a block is activated:
+<p>
+<table cellspacing=0 cellpadding=0 border=0>
+<tr><td bgcolor=#aaaaaa>
+<table cellspacing=1 cellpadding=3 border=0>
+<tr><td bgcolor=white align= center >&nbsp; self   &nbsp;</td><td bgcolor=white>&nbsp; the locals object where the block was created &nbsp;</td></tr>
+<tr><td bgcolor=white align= center >&nbsp; proto  &nbsp;</td><td bgcolor=white>&nbsp; the locals object where the block was created &nbsp;</td></tr>
+<tr><td bgcolor=white align= center >&nbsp; sender &nbsp;</td><td bgcolor=white>&nbsp; the local variables object of the caller &nbsp;</td></tr>
+<tr><td bgcolor=white align= center >&nbsp; thisBlock &nbsp;</td><td bgcolor=white>&nbsp; the current block </td></tr>
+<tr><td bgcolor=white align= center >&nbsp; thisMessage &nbsp;</td><td bgcolor=white>&nbsp; the message used to call the block </td></tr>
+
+</table>
+</tr></td>
+</table>
+
+<p>
+<b>Returns</b>
+<p>
+Any part of a block can return immediately using the return method. Example:
+
+<PRE>  Io>test = method(123 print; return "abc"; 456 print)
+  Io>test
+  123&lt;String 0x584c0 "abc"&gt;
+</PRE>
+
+<p>
+<b>The "activate" slot</b>
+<p>
+Normally, when a slot holding an Object is accessed, it returns the Object. However, if the Object has a slot named "activate" containing a method, it will be called with whatever arguments are passed with the message.
+
+<PRE>  inc = Object clone 
+  inc count = 1
+  inc activate = method(v, count += v)
+  inc(2) // returns 3
+</PRE>
+
+<p>
+<b>Introspection</b>
+<p>
+To get the value of a block in a slot without activating it, use the "getSlot" method:
+
+<PRE>  myMethod = Dog getSlot("bark")</PRE>
+
+Above, we've set the locals object "myMethod" slot to the bark method. It's important to remember that if you then want to pass the method value without activating it, you'll have to use the getSlot method:
+
+<PRE> otherObject newMethod = getSlot("myMethod")</PRE>
+
+Note: Here, the target of the getSlot method is the locals object.
+<p>
+<b>Exceptions</b>
+<p>
+
+The general forms for catching and raising an exception are:
+
+<PRE>  <i>catchException(exceptionNameString, &lt;doMessage&gt;, &lt;handleExceptionMessage&gt;)
+
+  raiseException(exceptionNameString, descriptionString)</i></PRE>
+
+catchException() catches any exception whose name begins with the specified exceptionNameString. If an empty string is used, it will catch all exceptions.
+When an exception is caught, the local slots exceptionName and exceptionDescription will be set with the appropriate values. Example:
+
+<PRE>  catchException("Test", 
+    raiseException("Test.blah", "this is a test"),
+    write("got exception: ", exceptionName, " : ", exceptionDescription)
+  )</PRE>
+
+<BR>
+<b>Exception Naming Conventions</b>
+<p>
+The following format is used for naming exceptions:
+
+<PRE>  <i>ModuleName.ObjectName.exceptionIdOrMethodName</i></PRE>
+
+Examples:
+<PRE>  "Io.Object.doesNotRespondTo" 
+  "Io.CFunction.invalidArgument"
+  "Io.Map.keyNotString"</PRE>
+<BR>
+<p>
+<b>Comments</b>
+<p>
+
+Comments of the //, /**/ and # style are supported. Examples:
+
+<PRE>  a = b // add a comment to a line
+
+  /* comment out a group
+  a = 1
+  b = 2
+  */
+</PRE>
+
+The "#" style is useful for unix scripts:
+
+<PRE>  #!/usr/local/bin/io</PRE>
+
+
+</UL>
+
+
+
+
+
+
+<A NAME="Primitives"></A>
+<h2>Primitives</h2>
+<UL>
+<p>
+Primitives are objects built into Io whose methods are implemented in C and (except for the Object primitive) store some hidden data in their instances. For example, the Number primitive has a double precision floating point number as it's hidden data. All Io primitives inherit from the Object prototype and are mutable. That is, their methods can be changed.
+<p>
+<UL>
+<LI><a href="primitives/Block.html"><b>Block</b></a>
+<LI><a href="primitives/Buffer.html"><b>Buffer</b></a>
+<LI><a href="primitives/CFunction.html"><b>CFunction</b></a>
+<LI><a href="primitives/Date.html"><b>Date</b></a>
+<LI><a href="primitives/Duration.html"><b>Duration</b></a>
+<LI><a href="primitives/File.html"><b>File</b></a>
+<LI><a href="primitives/Future.html"><b>Future</b></a>
+<LI><a href="primitives/List.html"><b>List</b></a>
+<LI><a href="primitives/LinkedList.html"><b>LinkedList</b></a>
+<LI><a href="primitives/Map.html"><b>Map</b></a>
+<LI><a href="primitives/Nop.html"><b>Nop</b></a>
+<LI><a href="primitives/Message.html"><b>Message</b></a>
+<LI><a href="primitives/Nil.html"><b>Nil</b></a>
+<LI><a href="primitives/Number.html"><b>Number</b></a>
+<LI><a href="primitives/Object.html"><b>Object</b></a>
+<LI><a href="primitives/String.html"><b>String</b></a>
+<LI><a href="primitives/WeakLink.html"><b>WeakLink</b></a>
+</UL>
+
+<p>
+</UL>
+
+
+<A NAME="Concurrency"></A>
+<h2>Concurrency</h2>
+<UL>
+
+Io uses Actors for concurrency. An Actor can be thought of as an object oriented thread. 
+Any Object in Io can be sent an asynchronous message by placing a @ 
+(think of the "a" in @ as standing for "Actor") or @@ before the message name. Example:
+
+<PRE>  result = self foo  // normal, synchronous message send
+  future = self @foo // asynchronous message send, immediately return a Future
+  self @@foo         // asynchronous message send, immediately return Nil
+</PRE>
+
+When an object receives an asynchronous message it puts the message in its
+queue and, if it doesn't already have one, starts a light weight thread (a
+coroutine) to process the messages in its queue. Queued messages are processed
+sequentially in a first-in-first-out order. Control can be yielded to other
+coroutines by calling "yield". Example:
+<PRE>
+  obj1 = Object clone
+  obj1 test = method(for(n, 1, 3, n print; yield))
+  obj2 = obj1 clone
+  obj1 @@test; obj2 @@test
+</PRE>
+This would print "112233". <p>
+Here's a more real world example:
+<PRE>  HttpServer handleRequest = method(aSocket,
+    handler = HttpRequestHandler clone
+    handler @handleRequest(aSocket)
+  )
+</PRE>
+<b>Yielding</b>
+<p>
+An Object will automatically yield between processing each of its asynchronous messages. The yield method only needs to be called if a yield is required during an asynchronous message execution. It's also possible to pause and resume an object. See the <a href="primitives/Object.html#Concurrency">Concurrency</a> methods of the Object primitive for details and related methods.
+<p>
+<b>Futures</b>
+<p>
+The result of the "@" asynchronous message can be accessed using the returned Future's value method: 
+<PRE>
+  future isReady // returns non-Nil if the value is ready
+  result = future value // pause current coroutine until value is ready
+</PRE>
+ This will pause the current coroutine until the receiver of the asynchronous message has processed the message. 
+<p>
+<b>Auto deadlock detection</b>
+<p>
+An advantage of using futures is that when a future's value method is called and requires a pause, it will check to see if pausing to wait for the result would cause a deadlock(it traverses the list of connected futures to do this). An "Io.Future.value" exception is raised if the action would cause a deadlock.
+<p> 
+
+<b>sendResultTo()</b>
+<p>
+It's also possible to have the result sent to a given object when ready:
+<PRE>
+  object @(foo) sendResultTo(otherObject, "methodName")
+</PRE>
+Example use:
+<PRE>
+  pages = List clone
+  urls foreach(i, url, URL clone setUrl(url) @(load) sendResultTo(pages, "add"))
+  // will fill the pages list as results come in
+</PRE>
+<b>Garbage Collection</b>
+<p>
+Even if an object is unreferenced, it will not be garbage collected until its message queue is processed.
+<p>
+<b>The @ and @@ Operators</b>
+<p>
+The @ or @@ before an asynchronous message is just a normal operator message. So:
+<PRE>  self @test
+</PRE>
+Gets parsed as(and can be written as):
+<PRE>  self @(test)
+</PRE>
+<p>
+<b>Efficiency</b>
+<p>
+An Object's coroutine and message queue are released when its queue is emptied and new ones are created when it receives a new asynchronous message. This avoids coroutine switching overhead and wasted memory usage for the typical case where most objects in the system are in an inactive state.
+<p>
+<b>Platform Dependence</b>
+<p>
+The coroutine code contains a few lines of platform specific code but is supported on a number of platforms (see the getting started section for a list of supported platforms). 
+</UL>
+
+
+<A NAME="Embedding"></A>
+<h2>Embedding</h2>
+<p>
+<ul>
+
+Simple embedding example:
+<PRE>#include "IoState.h"
+
+void MyPrint(void *state, char *s) { printf(s); }
+void MyExit(void *state) { exit(0); }
+void MyError(void *state, char *name, char *description) 
+{ printf("Error: %s - %s\n", name, description); }
+
+int main(int argc, const char *argv[])
+{
+  IoState *st = IoState_new();
+  Value *result;
+
+  IoState_printCallback_(st, MyPrint);
+  IoState_errorCallback_(st, MyError);
+  IoState_exitCallback_(st, MyExit);
+
+  result = IoState_doCString_(st, "1+2");
+  printf("result = <%s %p>\n", IoValue_name(result), result);
+  IoState_free(st);
+  return 0;
+}
+</PRE>
+
+</UL>
+<p>
+<A NAME="Binding"></A>
+<h2>Binding</h2>
+<p>
+<ul>
+
+<p><b>Writing your own primitives and binding C libraries</b><p>
+
+Binding a C library and adding a new primitive are the same thing in Io. All primitives work in the same way. Take a look at the source of any of the built-in Primitives such as IoList.h and IoList.c. Here's an example of an implementation of a method in IoList.c
+
+<PRE>
+IoValue *IoList_insert_at_(IoList *self, IoObject *locals, IoMessage *m)
+{
+  IoValue *v = IoMessage_locals_valueArgAt_(m, locals, 0);
+  IoNumber *index = IoMessage_locals_numberArgAt_(m, locals, 1);
+  List_at_insert_(self->list, IoNumber_asInt(index), v);
+  return (Value *)v;
+}
+</PRE>
+
+[further docs forthcoming]
+<p>
+base methods - mark, free, name...<br>
+declaring methods...<br>
+adding to state initialization...<br>
+adding proto, calling init...
+</UL>
+
+
+</UL>
+<p>
+<A NAME="Notes"></A>
+<h2>Notes</h2>
+<p>
+<ul>
+
+<b>Unicode</b>
+<p>
+Io should be compatible with UTF-8 unicode(which is backward compatible with ASCII).
+
+<p>
+<b>Recursion</b>
+<p>
+Recursion works as expected in Io. Example:
+
+<PRE>
+  factorial = method(n, if( n==1, 1, n * factorial( n - 1 )))
+</PRE>
+Like C, the depth is limited by stack space. Also, this implementation would be much faster:
+<PRE>
+  factorial = method(n,
+    v = n
+    while (n-- > 1, v *= n)
+    return v
+  )
+</PRE>
+<p>
+<b>Licensing</b>
+<p>
+There's no licensing restrictions on code written in Io source, but apps that embed Io have some restrictions. 
+All the Io VM code itself is BSD licensed so it's basically ok for any use (including commercial use) as long as you include the copyright licenses - see the _BSDLicence.txt file for details). Io uses a number of libraries that others have written though. The libraries used in IoVM and IoServer are all (as far as I'm aware) also BSD licensed - so just give the respective authors a credit. IoDesktop, however, uses several LGPL libraries. You should be able to avoid open sourcing an app that embeds IoDesktop by dynamically linking it though, but I'm not entirely sure.  
+
+</UL>
+<BR>
+<BR>
+<BR>
+<BR>
+
+</font>
+</body>
+</html>

@@ -1,0 +1,2 @@
+
+SOURCES += ${addprefix kdb/arch/mips64/, prepost.cc tlb.cc cpuid.cc reboot.cc cp0.cc watch.cc frame.cc}

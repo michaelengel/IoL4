@@ -1,0 +1,256 @@
+<HTML>
+<HEAD>
+<TITLE>File</TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+A {text-decoration: none}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>File</H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<A NAME="Summary"></A>
+<h2>Summary</h2>
+<ul>
+Encapsulates file i/o. Here's an example of opening a file, and reversing it's lines:
+<P>
+
+<PRE>  file = File clone openForUpdating("/tmp/test")
+  lines = file readLines reverse 
+  file rewind
+  lines foreach(i, line, file write(line, "\n"))
+  file close
+</PRE>
+
+
+</UL>
+
+<A NAME="Methods"></A>
+<h2>Methods</h2>
+<UL>
+<br>
+
+<b>type</b>
+<p>
+Returns the string "File".
+<br><br><br>
+
+<b>clone</b>
+<p>
+Returns a new File whose path and mode are the same as the receiver.
+<br><br><br>
+
+</UL>
+<h3>Standard I/O</h3>
+<UL>
+<br>
+
+<b>standardInput</b>
+<p>
+Returns a new File whose stream is set to the standard input stream.
+<br><br><br>
+
+<b>standardOutput</b>
+<p>
+Returns a new File whose stream is set to the standard output stream.
+<br><br><br>
+
+</UL>
+<h3>Path</h3>
+<UL>
+<br>
+
+<b>setPath(pathString)</b>
+<p>
+Sets the file path of the receiver to pathString. The default path is "". Returns self.
+<br><br><br>
+
+<b>path</b>
+<p>
+Returns the file path of the receiver.
+<br><br><br>
+
+<b>name</b>
+<p>
+Returns the receiver's last path component. 
+<br><br><br>
+
+<b>useTemporaryPath</b>
+<p>
+Sets the path to an unused temporary file path.
+<br><br><br>
+
+</UL>
+<h3>Info</h3>
+<UL>
+<br>
+
+<b>exists</b>
+<p>
+Returns self if the file specified by the receiver's path exists, Nil otherwise.
+<br><br><br>
+
+<b>size</b>
+<p>
+Returns a Number with the number of bytes in the file.
+<br><br><br>
+
+
+</UL>
+<h3>Open/Close</h3>
+<UL>
+<br>
+
+<b>openForReading(optionalPathString)</b>
+<p>
+Sets the file mode to <i>read</i> (reading only) and calls open(optionalPathString).
+<br><br><br>
+
+<b>openForUpdating(optionalPathString)</b>
+<p>
+Sets the file mode to <i>update</i> (reading and writing) and calls open(optionalPathString).
+<br><br><br>
+
+<b>openForAppending(optionalPathString)</b>
+<p>
+Sets the file mode to <i>append</i> (writing to the end of the file) and calls open(optionalPathString).
+<br><br><br>
+
+<b>open(optionalPathString)</b>
+<p>
+Opens the file. Creates one if it does not exist. If the optionalPathString argument is provided, the path is set to it before opening. 
+Returns self or raises an "File.*" exception on error.
+<br><br><br>
+
+<b>mode</b>
+<p>
+Returns the open mode of the file(either "read", "update" or "append").
+<br><br><br>
+
+<b>close</b>
+<p>
+Closes the receiver if open, otherwise does nothing. Returns self.
+<br><br><br>
+
+</UL>
+<h3>Reading</h3>
+<UL>
+<br>
+
+<b>asString</b>
+<p>
+Opens the receiver in read only mode, reads the whole contents of the file into a string, closes the file and returns the string.
+<br><br><br>
+
+<b>asBuffer</b>
+<p>
+Opens the receiver in read only mode, reads the whole contents of the file into a buffer object, closes the file and returns the buffer.
+<br><br><br>
+
+<b>readLine</b>
+<p>
+Reads the next line of the file and returns it as a string without the return character. Returns Nil if the end of the file has been reached.
+<br><br><br>
+
+<b>readLines</b>
+<p>
+Returns a List of strings containing the lines of the file.
+<br><br><br>
+
+
+<b>readStringOfLength(aNumber)</b>
+<p>
+Reads a string of the specified length and returns it. Returns Nil if the end of the file has been reached.
+<br><br><br>
+
+<b>at(positionNumber)</b>
+<p>
+Returns the byte value at the file position specified by positionNumber.
+<br><br><br>
+
+
+<b>foreach(&lt;indexSlot&gt;, &lt;valueSlot&gt;, &lt;aMessage&gt;)</b>
+<p>
+For each byte, set indexSlot to the index of the byte and valueSlot to the number containing the byte value and execute aMessage.<BR> Example usage:
+
+<PRE>  aFile foreach(i, v, write("byte at ", i, " is ", v, "\n"))</PRE>
+
+<br><br><br>
+
+
+
+
+</UL>
+<h3>Writing</h3>
+<UL>
+<br>
+
+<b>write(aStringOrBuffer1, aStringOrBuffer2, ...)</b>
+<p>
+Writes the aStringOrBuffer arguments to the receiver file. Returns self.
+<br><br><br>
+
+<b>atPut(positionNumber, byteNumber)</b>
+<p>
+Writes the byte value of byteNumber to the file position positionNumber. Returns self.
+<br><br><br>
+
+<b>flush</b>
+<p>
+Forces any buffered data to be written to disk. Returns self.
+<br><br><br>
+
+
+</UL>
+<h3>Positioning</h3>
+<UL>
+<br>
+
+
+<b>rewind</b>
+<p>
+Sets the file position pointer to the beginning of the file.
+<br><br><br>
+
+<b>setPosition(aNumber)</b>
+<p>
+Sets the file position pointer to the byte specified by aNumber. Returns self.
+<br><br><br>
+
+<b>position</b>
+<p>
+Returns the current file pointer byte position as a Number.
+<br><br><br>
+
+
+</UL>
+<h3>Other</h3>
+<UL>
+<br>
+
+<b>remove</b>
+<p>
+Removes the file specified by the receiver's path. Raises an "File.doesNotExist" exception if the file does not exist. Returns self.
+<br><br><br>
+
+<b>moveTo(pathString)</b>
+<p>
+Moves the file specified by the receiver's path to the new path pathString. Raises an "File.doesNotExist" exception if the file does not exist or an "File.nameConflict" exception if the file nameString already exists.
+<br><br><br>
+
+
+</UL>
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+</html>

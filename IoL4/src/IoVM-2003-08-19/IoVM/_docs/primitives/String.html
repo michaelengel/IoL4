@@ -1,0 +1,303 @@
+<HTML>
+<HEAD>
+<TITLE>String</TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+A {text-decoration: none}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>String</H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<A NAME="Summary"></A>
+<h2>Summary</h2>
+<ul>
+A String is a container for a byte array that can contain strings or other data. Methods that take index number arguments will treat negative indexes as the string length + the negative index. For example, the method from_to_(-1,-1) would return a string containing the last character of the receiver.
+</UL>
+
+<A NAME="Methods"></A>
+<h2>Methods</h2>
+<UL>
+
+<b>clone</b>
+<p>
+Returns self.
+<br><br><br>
+
+
+<b>type</b>
+<p>
+Returns a string with the value "String".
+<br><br><br>
+
+
+
+</UL>
+<h3>Accessors</h3>
+<UL>
+<BR>
+
+<b>asNumber</b>
+<p>
+Returns the receiver converted to a number. Initial whitespace is ignored.
+<p>
+
+<b>asString</b>
+<p>
+Returns self.
+<br><br><br>
+
+<b>asBuffer</b>
+<p>
+Returns a Buffer representation of the receiver.
+<br><br><br>
+
+<b>at(aNumber)</b>
+<p>
+Returns a number with the byte representation of the character of the receiver at the index Specified. The index is wrapped as described in the summary.
+<br><br><br>
+
+<b>find(aString, startIndex)</b>
+<p>
+Returns a number with the first occurrence of aString in the receiver after the startIndex. The startIndex argument is optional. By default find starts at the beginning of the string. Nil is returned if no occurrences are found. 
+<br><br><br>
+
+<b>reverseFind(aString, startIndex)</b>
+<p>
+Returns a number with the first occurrence of aString in the receiver <i>before</i> the startIndex. The startIndex argument is optional. By default reverseFind starts at the end of the string. Nil is returned if no occurrences are found. 
+<br><br><br>
+
+<b>beginsWtih(aString)</b>
+<p>
+Returns self if the receiver begins with aString, Nil otherwise. 
+<br><br><br>
+
+<b>endsWith(aString)</b>
+<p>
+Returns self if the receiver ends with aString, Nil otherwise. 
+<br><br><br>
+
+<b>contains(aString)</b>
+<p>
+Returns self if the receiver contains the substring aString, Nil otherwise. 
+<br><br><br>
+
+<b>containsAnyCase(aString)</b>
+<p>
+Returns self if the receiver contains the aString regardless of casing, Nil otherwise. 
+<br><br><br>
+
+<b>length</b>
+<p>
+Returns a number with the length of the receiver.
+<br><br><br>
+
+<b>split(aString1, aString2, ...)</b>
+<p>
+Returns a List of strings of the receiver split by aString1, aString2, etc. Example:
+
+<PRE>  "this is a \ttest" split(" ", "\t")</PRE>
+
+would return a list containing:
+
+<PRE>  "this", "is", "a", "test"</PRE>
+<p>
+
+<b>splitCount(aString1, aString2, ...)</b>
+<p>
+Same as split method but returns the number of results instead of a List of Strings. If you only need the count, this method is much faster than split().
+<br><br><br>
+
+
+<b>splitAt(index)</b>
+<p>
+Returns a list containing 2 strings that are the receiver split at the specified index(with the character <i>at</i> the index going into the 2nd string). 
+<br><br><br>
+
+<b>substring(startIndex, endIndex)</b>
+<p>
+Returns a new string containing the substring of the receiver from the startIndex to the endIndex. The endIndex argument is optional. If not given, it is assumed to be the end of the string.
+<br><br><br>
+
+
+
+
+</UL>
+<h3>String Manipulation</h3>
+<UL>
+<BR>
+
+<b>escape</b>
+<p>
+Returns a new String with escape characters replaced with escape codes. For example a string containing a single return character would contain the following 2 characters after being escaped: "\n".
+<br><br><br>
+
+<b>unescape</b>
+<p>
+Returns a new String with escape codes replaced with escape character.
+<br><br><br>
+
+<b>append(aString)</b>
+<p>
+Returns a new string with aString to the receiver.  
+<br><br><br>
+
+<b>.. aString</b>
+<p>
+Same as append(aString).
+<br><br><br>
+
+<b>insert(aString, indexNumber)</b>
+<p>
+Returns a new string with aString inserted at indexNumber in the receiver. 
+<br><br><br>
+
+
+<b>removeFromTo(startIndex, endIndex)</b>
+<p>
+Returns a new string that is a copy of the receiver with the substring from startIndex to endIndex removed.
+<br><br><br>
+
+<b>replace(aString, anotherString)</b>
+<p>
+Returns a new string with all occurances of aString replaced with anotherString in the receiver.
+<br><br><br>
+
+<b>lower</b>
+<p>
+Returns a copy of the receiver with all characters made lowercase. 
+<br><br><br>
+
+<b>upper</b>
+<p>
+Returns a copy of the receiver with all characters made uppercase. 
+<br><br><br>
+
+
+</UL>
+<h3>Loops</h3>
+<UL>
+<BR>
+
+<b>foreach(&lt;indexSlot&gt;, &lt;valueSlot&gt;, &lt;aMessage&gt;)</b>
+<p>
+For each character, set indexSlot to the index of the character and valueSlot to the number containing the character value and execute aMessage. Example usage:
+
+<PRE>  aString foreach(i, v, 
+    write("byte at ", i, " is ", v, "\n")
+  )</PRE>
+
+Example use with a block:
+
+<PRE>  myBlock = block(v, write(v, "\n")) 
+  aString foreach(i, v, block(v))</PRE>
+<br><br><br>
+
+
+
+</UL>
+<h3>Comparison</h3>
+<UL>
+<BR>
+
+<b>==</b>, <b>!=</b>, <b>&gt;</b>, <b>&lt;</b>, <b>&gt;=</b>, <b>&lt;=</b>
+<p>
+The String object supports all of the above standard comparison operations. Each returns self if true, Nil if false.
+<br><br><br>
+
+
+
+
+</UL>
+<h3>Utility</h3>
+<UL>
+<BR>
+
+<b>print</b>
+<p>
+Prints the content of the string to standard output.
+<br><br><br>
+
+<b>linePrint</b>
+<p>
+Prints the content of the string to standard output followed by a new line character.
+<br><br><br>
+
+<b>doFile(optionalArg1, optionalArg2, ...)</b>
+<p>
+Executes the contents of the file with the path specified by the receiver. Returns the result. Any arguments are used as command line arguments would be.
+<br><br><br>
+
+
+<b>join(aList, optionalSeperatorString)</b>
+<p>
+Joins a list of strings and returns a single string result. Example:
+<PRE>
+l = List clone add("a", "b", "c")
+result = String join(l) // result = "abc"
+</PRE>
+If a optionalSeperatorString argument is given it is inserted between the strings in the result. Example:
+<PRE>
+l = List clone add("a", "b", "c")
+result = String join(l, ".") // result = "a.b.c"
+</PRE>
+<br><br><br>
+
+</UL>
+<h3>Base Conversions</h3>
+<UL>
+<BR>
+
+<b>asBase(aNumber)</b>
+<p>
+Returns a string containing the receiver(which is assumed to be a base 10 number) converted to the specified base. Only base 8 and 16 are currently supported.
+<br><br><br>
+
+
+<b>fromBase(aNumber)</b>
+<p>
+Returns a string with a base 10 representation of the receiver converted from the specified base. Only base 8 and 16 are currently supported.
+<br><br><br>
+
+</UL>
+<h3>File Paths</h3>
+<UL>
+<BR>
+
+
+<b>appendPath(aString)</b>
+<p>
+Returns a string with aString appended to the receiver such that there is one and only one path separator between the two.
+<br><br><br>
+
+<b>removeLastPathComponent</b>
+<p>
+Returns a string containing the receiver clipped after the last path separator.
+<br><br><br>
+
+
+<b>lastPathComponent</b>
+<p>
+Returns a string containing the receiver clipped up to the last path separator.
+<br><br><br>
+
+<b>pathExtension</b>
+<p>
+Returns a string containing the receiver clipped up to the last period.
+<br><br><br>
+
+</UL>
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+</html>

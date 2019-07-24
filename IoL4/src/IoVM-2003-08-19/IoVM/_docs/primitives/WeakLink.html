@@ -1,0 +1,105 @@
+<HTML>
+<HEAD>
+<TITLE>WeakLink</TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+A {text-decoration: none}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>WeakLink</H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<A NAME="Summary"></A>
+<h2>Summary</h2>
+<ul>
+A WeakLink is a primitive that can hold a reference to an object without preventing the garbage collector from collecting it. The link reference is set with the setLink() method. After the garbage collector collects an object, it informs any WeakLink objects whose link value pointed to that object. If a WeakLink has a delegate set, it will send the delagate a "collectedWeakLink" message with the WeakLink as an argument. <p>
+
+The "identifier" value of a WeakLink is usefull for storing miscellaneous information about the link if needed.
+<p>
+<b>What are weak links useful for?</b>
+<p>
+In general, their handy when you want to monitor or cache an object without "owning" it. Examples:
+<p>
+<b>Distributed Objects example</b>
+<p>
+My original motivation for adding weaklinks was to deal with garbage collection in a distributed object system. In such a system, it can be usefull to keep a list of proxies that have been created to represent remote objects, but you don't want this list to cause those objects to be forever retained. 
+<p>
+<b>Database Caching example</b>
+<p>
+In a persistance layer to a database it's often desirable to have separate queries return the same row objects if some other part of the application has already fetched them. This involves a cache, and weak links allow the cache to only keep database items that are still referenced by other parts of the application.
+<p>
+<b>Implementation notes</b>
+<p>
+When a WeakLink's link is set, it sets a weak link bit in the mark byte of the object being monitored. When the garbage collector collects an object, it checks this bit and if it's marked, looks in it's list of WeakLinks and sends a "collected" message to each WeakLink that references that object. 
+</UL>
+
+<A NAME="Methods"></A>
+<h2>Methods</h2>
+<UL>
+
+<b>clone</b>
+<p>
+Returns a copy of the receiver.
+<br><br><br>
+
+
+<b>type</b>
+<p>
+Returns a String with the value "WeakLink".
+<br><br><br>
+
+
+
+</UL>
+<h3>Setter and Getters</h3>
+<UL>
+<BR>
+
+<b>setLink(aValue)</b>
+<p>
+Sets the link pointer. Returns self.
+<br><br><br>
+
+<b>link</b>
+<p>
+Returns the link pointer or Nil if none is set.
+<br><br><br>
+
+
+<b>setDelegate(aValue)</b>
+<p>
+Sets the delegate. Returns self.
+<br><br><br>
+
+<b>delegate</b>
+<p>
+Returns the delegate or Nil if none is set.
+<br><br><br>
+
+
+<b>setIdentifier(aValue)</b>
+<p>
+Sets the identifier. Returns self.
+<br><br><br>
+
+<b>identifier</b>
+<p>
+Returns the identifier or Nil if none is set.
+<br><br><br>
+
+</UL>
+
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+</html>

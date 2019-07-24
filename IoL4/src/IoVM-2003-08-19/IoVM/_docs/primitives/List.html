@@ -1,0 +1,219 @@
+ <HTML>
+<HEAD>
+<TITLE> List </TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+A {text-decoration: none}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>List</H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<A NAME="Summary"></A>
+<h2>Summary</h2>
+<ul>
+An mutable array of values. The first index is 0.
+</UL>
+
+<A NAME="Methods"></A>
+<h2>Methods</h2>
+<UL>
+
+<b>clone</b>
+<p>
+Returns a new list that is a shallow copy of the receiver.
+<br><br><br>
+
+
+<b>type</b><p>
+Returns the string "List".
+<br><br><br>
+
+
+
+</UL>
+<h3>Accessors</h3>
+<UL>
+<br>
+
+<b>at(indexNumber)</b><p>
+Returns the value at indexNumber.
+<br><br><br>
+
+<b>contains(aValue)</b><p>
+Returns self if the receiver contains aValue, otherwise returns Nil.
+<br><br><br>
+
+<b>count</b><p>
+Returns the number of items in the receiver.
+<br><br><br>
+
+<b>indexOf(aValue)</b><p>
+Returns the index of the first occurrence of aValue. Returns Nil if no occurrence is found.
+<br><br><br>
+
+<b>print(optionalSeperatorString)</b><p>
+Prints the list items and returns self. The default separator string is ", ".
+<br><br><br>
+
+
+
+
+</UL>
+<h3>Modifiers</h3>
+<UL>
+<br>
+
+<b>add(aValue)</b><p>
+Add aValue to the end of the list. Returns self.
+<br><br><br>
+
+<b>atPut(indexNumber, aValue)</b><p>
+Puts aValue at the index specified by indexNumber. Returns aValue.
+If indexNumber is larger than the List size, the List is made large enough to fit it and the empty elements are set to Nil.
+<br><br><br>
+
+<b>empty</b><p>
+Removes all items from the receiver.
+<br><br><br>
+
+<b>insertAt(aValue, indexNumber)</b><p>
+Inserts aValue at the index specified by indexNumber. Returns aValue.
+<br><br><br>
+
+<b>push(aValue)</b><p>
+Same as add(aValue).
+<br><br><br>
+
+<b>pop</b><p>
+Returns the last item in the list and removes it from the receiver. Returns nil if the receiver is empty.
+<br><br><br>
+
+<b>remove(aValue)</b><p>
+Removes all occurances of aValue in the receiver. Returns self.
+<br><br><br>
+
+<b>removeAt(indexNumber)</b><p>
+Removes the item at the index specified by indexNumber. Returns the value removed. Returns nil if the index is invalid.
+<br><br><br>
+
+<b>reverse</b><p>
+Reverses the ordering of all the items in the receiver. Returns self.
+<br><br><br>
+
+
+
+
+
+</UL>
+<h3>Comparison</h3>
+<UL>
+<br>
+
+<b>==(aList)</b><p>
+Returns self if aList contains the same elements in the same order as the receiver, otherwise returns Nil.
+<br><br><br>
+
+
+
+</UL>
+<h3>Utility</h3>
+<UL>
+<br>
+
+<b>random</b><p>
+Returns a random element of the receiver or Nil if the receiver is empty.
+<br><br><br>
+
+<b>randomize</b><p>
+Randomizes the order of the elements in the receiver. Returns self.
+<br><br><br>
+
+
+
+</UL>
+<h3>Logical operations</h3>
+<UL>
+<br>
+
+<b>and(aValue)</b><p>
+Returns nil if aValue is nil, self, otherwise.
+<br><br><br>
+
+
+<b>or(aValue)</b><p>
+Returns self.
+<br><br><br>
+
+
+</UL>
+<h3>Sorting</h3>
+<UL>
+<br>
+
+<b>sort</b><p>
+Sorts items in List by internal compare method.
+<br><br><br>
+
+<b>sortBy(methodNameString)</b><p>
+Sorts items by value returned from the specified method.
+<br><br><br>
+
+</UL>
+<h3>Loops</h3>
+<UL>
+<br>
+
+<b>doBlock(aBlock)</b>
+<p>
+Calls aBlock with each value as the first argument.<BR> Example usage:
+
+<PRE>  aList doBlock(block(v, write(v, "\n")))</PRE>
+<br>
+
+<b>foreach(&lt;indexSlot&gt;, &lt;valueSlot&gt;, &lt;aMessage&gt;)</b>
+<p>
+For each value, set the indexSlot to the index of the value and the valueSlot to the value and execute aMessage.<BR> Example usage:
+
+<PRE>  aList foreach(i, v, 
+    write(v, "\n")
+  )</PRE>
+
+Example use with a block:
+
+<PRE>  myBlock = block(v, write(v, "\n")) 
+  aList foreach(i, v, myBlock(v))</PRE>
+
+foreach() will generally perform much better than doBlock() unless you specifically need to execute a block.
+<br><br><br>
+
+<b>select(aBlock)</b>
+<p>
+Calls aBlock with each value as the first argument and removes items that return Nil. Returns self.
+<br><br><br>
+
+<b>reject(aBlock)</b>
+<p>
+Calls aBlock with each value as the first argument and removes items that return non Nil. Returns self.
+<br><br><br>
+
+<b>detect(aBlock)</b>
+<p>
+Calls aBlock with each value as the first argument and returns the first item that return a non Nil.
+<br><br><br>
+
+</UL>
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+</html>

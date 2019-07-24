@@ -1,0 +1,285 @@
+######################################################################
+#		 
+# Copyright (C) 1999, 2000, 2001,  Karlsruhe University
+#		 
+# File path:	 config/rules.cml
+# Description:	 rules for Pistachio's CML2 configuration system
+#		 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#		 
+# $Id: rules.cml,v 1.52 2003/05/02 06:29:17 sjw Exp $
+#		 
+######################################################################
+
+prefix "CONFIG_"	# Stripped at read time, prepended at save time
+
+# symbol definitions
+symbols
+
+#
+# main menu
+#
+main          'Pistachio Kernel Configuration System'
+
+
+#
+# hardware menu
+#
+arch            'Basic Architecture'
+
+SMP		'Multiprocessor Support'
+SMP_MAX_PROCS	'Maximum number of CPUs'
+SMP_IDLE_POLL	'Poll XCPU queue on idle'
+
+UNCACHED	'Run CPU uncached'
+
+IOAPIC		'Use APIC+IOAPIC'
+MAX_IOAPICS	'Maximum number of supported IO APICs'
+APIC_TIMER_TICK 'Timer tick length for APIC'
+
+MAX_NUM_ASIDS   'The maximum number of ASIDs'
+PREEMPT_ASIDS   'Whether or not to pre-empt ASIDs'
+BOOTMEM_PAGES	'The number of pages to reserve for the kernel'
+
+#
+# kernel menu
+#
+IPC_FASTPATH	'Fast IPC path'
+DEBUG		'Enable Debugging mode'
+PERFMON         'Enable Performance Monitoring'
+
+
+#
+# debugger menu
+#
+KDB		'Enable Kernel Debugger'
+kdb_console	'Kernel Debugger Console'
+KDB_CONS_COM	'Serial Port'
+KDB_CONS_KBD	'Keyboard'
+KDB_COMPORT	'Kernel Debugger Serial Port'
+KDB_COMSPEED	'Kernel Debugger Serial Port Speed'
+KDB_DISAS	'Enable Disassembler'
+KDB_ON_STARTUP	'Enter kernel debugger on startup'
+KDB_BREAKIN	'Kernel Debugger breakin'
+
+KDB_NO_ASSERTS 'Disable all ASSERT, WARNING, TRACE, etc.' text
+
+By default, if the kernel debugger is enabled, numerous internal
+run-time checks are performed through ASSERT(...) macros.  There are
+also places in the code where a warning is emitted (WARNING) or other
+output is generated (TRACE).  While these checks may allow to catch
+kernel bugs early, they induce a non negligible overhead.
+
+For benchmarking one would normally disable the kernel debugger
+completely.  There may, however, be certain situations, where the
+kernel debugger comes in handy during benchmarks.
+
+If you want to run benchmarks and still need the kernel debugger, say
+Yes here. If unsure, say No.
+.
+
+
+#
+# trace submenu
+#
+VERBOSE_INIT	'Verbose initializion'
+TRACEPOINTS	'Enable Tracepoints'
+KMEM_TRACE	'Enable tracing of kernel memory'
+TRACEBUFFER	'Enable Tracebuffer'
+
+
+#
+# codegen menu
+#
+
+
+# menus
+hardware	'Hardware'
+kernel		'Kernel'
+debugger	'Debugger'
+trace		'Trace Settings'
+codegen		'Code Generator Options'
+hardware_misc	'Miscellaneous'
+
+
+
+
+menu hardware
+	arch
+	ia32_type
+	ia64_type
+	alpha_type
+	mips64_type
+	powerpc_type
+	ia32_platform
+	ia64_platform
+#	alpha_platform
+	mips64_platform
+	powerpc_platform
+	SMP { SMP_MAX_PROCS% SMP_IDLE_POLL}
+	UNCACHED
+	hardware_misc
+	
+
+choices arch    # Basic architecture
+	ARCH_IA32
+	ARCH_IA64
+	ARCH_POWERPC
+	ARCH_ALPHA
+	ARCH_MIPS64
+	default ARCH_IA32
+
+choices ia32_type
+	CPU_IA32_I586 CPU_IA32_I686 CPU_IA32_P4
+	default CPU_IA32_P4
+
+choices powerpc_type
+	CPU_POWERPC_IBM750
+	default CPU_POWERPC_IBM750
+
+unless ARCH_IA32 suppress dependent ia32_type
+unless ARCH_POWERPC suppress dependent powerpc_type
+unless ARCH_IA64 or ARCH_IA32 or ARCH_POWERPC suppress dependent SMP
+unless ARCH_MIPS64 suppress dependent UNCACHED
+unless ARCH_IA32 and SMP suppress dependent SMP_IDLE_POLL
+
+
+choices ia32_platform
+	PLAT_PC99
+	default PLAT_PC99
+
+choices powerpc_platform
+	PLAT_OFPPC
+	default PLAT_OFPPC
+
+
+unless ARCH_IA32 suppress dependent ia32_platform
+unless ARCH_POWERPC suppress dependent powerpc_platform
+
+
+menu hardware_misc
+	IOAPIC { MAX_IOAPICS% APIC_TIMER_TICK% }
+	PPC_EXPOSE_OPIC
+	MAX_NUM_ASIDS%
+	PREEMPT_ASIDS
+	BOOTMEM_PAGES%
+
+default MAX_IOAPICS from 2
+default APIC_TIMER_TICK from 1000
+default PPC_EXPOSE_OPIC from n
+unless ARCH_POWERPC suppress PPC_EXPOSE_OPIC
+when ARCH_POWERPC or ARCH_ALPHA or ARCH_MIPS64 suppress IOAPIC
+default MAX_NUM_ASIDS from 256
+default PREEMPT_ASIDS from n
+default BOOTMEM_PAGES from 1024
+unless ARCH_MIPS64 or ARCH_ALPHA suppress MAX_NUM_ASIDS PREEMPT_ASIDS BOOTMEM_PAGES
+
+
+default SMP_MAX_PROCS from 4
+
+menu kernel
+	IPC_FASTPATH
+	DEBUG
+	PPC_BAT_SYSCALLS
+        PERFMON
+
+default IPC_FASTPATH from n
+default PPC_BAT_SYSCALLS from y
+unless ARCH_POWERPC suppress PPC_BAT_SYSCALLS
+unless CPU_IA32_I686 or CPU_IA64_ITANIUM suppress dependent PERFMON
+unless ARCH_IA64 or ARCH_POWERPC or ARCH_IA32 or ARCH_ALPHA or ARCH_MIPS64 suppress IPC_FASTPATH
+
+menu debugger
+	KDB
+	ppc_debug_consoles
+	kdb_console
+	KDB_COMPORT@
+	KDB_COMSPEED%
+	KDB_DISAS
+	KDB_ON_STARTUP
+	KDB_BREAKIN
+        KDB_NO_ASSERTS
+	trace
+
+default DEBUG from y
+unless DEBUG suppress dependent debugger
+default KDB_COMPORT from 0x3f8 range 0x3F8 0x2F8 0x3E8 0x2E8
+default KDB_COMSPEED from 115200 range 115200 57600 38400
+unless KDB_CONS_COM suppress KDB_COMPORT KDB_COMSPEED
+unless KDB suppress dependent kdb_console KDB_COMPORT KDB_COMSPEED KDB_DISAS KDB_ON_STARTUP KDB_BREAKIN trace ppc_debug_consoles
+when ARCH_POWERPC suppress kdb_console KDB_COMPORT KDB_COMSPEED KDB_BREAKIN
+unless ARCH_POWERPC suppress ppc_debug_consoles
+when ARCH_MIPS64 or ARCH_ALPHA suppress kdb_console KDB_COMPORT KDB_COMSPEED KDB_DISAS
+
+
+choices kdb_console
+	KDB_CONS_KBD KDB_CONS_COM KDB_CONS_SKI
+	default KDB_CONS_COM
+
+menu trace
+	VERBOSE_INIT
+	TRACEPOINTS
+	KMEM_TRACE
+        TRACEBUFFER
+
+unless ARCH_IA32 suppress dependent TRACEBUFFER
+
+
+menu codegen
+	SYSV_ABI
+	PPC_SEGMENT_LOOP
+	PPC_MULTIWORD_INSTR
+
+default SYSV_ABI from y
+default PPC_MULTIWORD_INSTR from y
+unless ARCH_POWERPC suppress SYSV_ABI PPC_SEGMENT_LOOP PPC_MULTIWORD_INSTR
+
+menu main       # Configure the Pistachio kernel
+	hardware
+	kernel
+	debugger
+	codegen
+
+
+
+derive IS_32BIT from ARCH_IA32 or ARCH_POWERPC
+derive IS_64BIT from ARCH_IA64 or ARCH_ALPHA or ARCH_MIPS64
+derive BIGENDIAN from ARCH_POWERPC or ARCH_MIPS64
+when MIPS64_LITTLE_ENDIAN suppress BIGENDIAN
+derive ACPI from ARCH_IA64
+
+source "powerpc.cml"
+source "ia32.cml"
+source "ia64.cml"
+source "alpha.cml"
+source "mips64.cml"
+
+#
+# here comes the real stuff
+#
+start main			# Start with the menu named 'main'
+#condition nohelp on EXPERT	# Only make undocumented symbols visible when this is on
+#warndepend EXPERIMENTAL	# Append (EXPERIMENTAL) to dependent queries
+#warndepend DANGEROUS
+#warndepend OBSOLETE
+
+# End

@@ -1,0 +1,71 @@
+<HTML>
+<HEAD>
+<TITLE>Future</TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+A {text-decoration: none}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>Future</H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<A NAME="Summary"></A>
+<h2>Summary</h2>
+<ul>
+A container for a value returned by an asynchronous message. If the value is accessed before the asynchronous message is processed, the current coroutine will pause until the value is ready.
+<P>
+</UL>
+
+<A NAME="Methods"></A>
+<h2>Methods</h2>
+<UL>
+<br>
+
+<b>type</b>
+<p>
+Returns the string "Future".
+<br><br><br>
+
+<b>clone</b>
+<p>
+Returns a copy of the receiver.
+<br><br><br>
+
+</UL>
+<h3>Comparison</h3>
+<UL>
+<br>
+
+<b>&lt;, &gt;, ==, !=</b>
+<p>
+All of the standard comparision methods are supported and take a Future argument. 
+<br><br><br>
+
+</UL>
+<h3>Standard methods</h3>
+<UL>
+<br>
+
+<b>value</b>
+<p>
+Returns the value of the Future, if the value is not yet ready, this will pause the current coroutine until the value is ready.
+<br><br><br>
+
+<b>isReady</b>
+<p>
+Returns self if the value is ready, Nil otherwise.
+<br><br><br>
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+</html>

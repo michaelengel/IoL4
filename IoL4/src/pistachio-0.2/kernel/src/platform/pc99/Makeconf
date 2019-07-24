@@ -1,0 +1,8 @@
+SOURCES += $(addprefix src/platform/pc99/, startup.S)
+
+ifeq ("$(CONFIG_IOAPIC)","")
+SOURCES += src/platform/pc99/intctrl-pic.cc
+endif
+ifeq ("$(CONFIG_SMP)","y")
+SOURCES += src/platform/pc99/smp.S
+endif

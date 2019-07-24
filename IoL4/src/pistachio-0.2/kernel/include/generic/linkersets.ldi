@@ -1,0 +1,10 @@
+	.sets . : AT(ADDR(.sets) - KERNEL_OFFSET)
+	{
+		_start_setlist = .;
+		*(.setlist)
+		_end_setlist = .;
+		_start_sets = .;
+		*(SORT(set_*))
+		_end_sets = .;
+	}
+

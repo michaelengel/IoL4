@@ -1,0 +1,2 @@
+
+write("launchPath = ", launchPath, "\n")

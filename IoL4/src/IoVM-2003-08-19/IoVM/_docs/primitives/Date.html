@@ -1,0 +1,253 @@
+<HTML>
+<HEAD>
+<TITLE>Date</TITLE>
+<STYLE>
+BODY, TD, TABLE, TR { font-size:13; font-weight:normal; font-family:"arial, helvetica"; } 
+PRE { font-size:13; font-weight:normal; font-family:"courier"; } 
+A {text-decoration: none}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<font face="arial, helvetica">
+
+<H1>Date</H1>
+<SMALL>
+Copyright 2002, Steve Dekorte. All rights reserved.<BR>
+</SMALL>
+<BR>
+
+<A NAME="Summary"></A>
+<h2>Summary</h2>
+<ul>
+A container for a date and time.
+<P>
+</UL>
+
+<A NAME="Methods"></A>
+<h2>Methods</h2>
+<UL>
+<br>
+
+<b>type</b>
+<p>
+Returns the string "Date".
+<br><br><br>
+
+<b>clone</b>
+<p>
+Returns a copy of the receiver.
+<br><br><br>
+
+</UL>
+<h3>Comparison</h3>
+<UL>
+<br>
+
+<b>&lt;, &gt;, ==, !=</b>
+<p>
+All of the standard comparision methods are supported and take a Date argument. 
+<br><br><br>
+
+</UL>
+<h3>Standard methods</h3>
+<UL>
+<br>
+
+<b>now</b>
+<p>
+Sets the receiver to the current time.
+<br><br><br>
+
+<b>clock</b>
+<p>
+Returns a number containing the number of seconds of processor time since the beginning of the program or -1 if unavailable.
+<br><br><br>
+
+<b>year</b>
+<p>
+Returns a number containing the year of the receiver.
+<br><br><br>
+
+<b>setYear(aNumber)</b>
+<p>
+Sets the year of the receiver.
+<br><br><br>
+
+<b>month</b>
+<p>
+Returns a number containing the month(1-12) of the year of the receiver.
+<br><br><br>
+
+<b>setMonth(aNumber)</b>
+<p>
+Sets the month of the receiver.
+<br><br><br>
+
+<b>day</b>
+<p>
+Returns a number containing the day of the month of the receiver.
+<br><br><br>
+
+<b>setDay(aNumber)</b>
+<p>
+Sets the day of the receiver.
+<br><br><br>
+
+<b>hour</b>
+<p>
+Returns a number containing the hour of the day(0-23) of the receiver.
+<br><br><br>
+
+<b>setHour(aNumber)</b>
+<p>
+Sets the hour of the receiver.
+<br><br><br>
+
+<b>minute</b>
+<p>
+Returns a number containing the minute of the hour(0-59) of the receiver.
+<br><br><br>
+
+<b>setMinute(aNumber)</b>
+<p>
+Sets the minute of the receiver.
+<br><br><br>
+
+<b>second</b>
+<p>
+Returns a number containing the seconds of the minute(0-59) of the receiver. This number may contain fractions of seconds.
+<br><br><br>
+
+<b>setSecond(aNumber)</b>
+<p>
+Sets the second of the receiver.
+<br><br><br>
+
+<b>isDaylightSavingsTime</b>
+<p>
+Returns self if Daylight Saving Time is in effect for the receiver, otherwise returns Nil.
+<br><br><br>
+
+<b>zone</b>
+<p>
+Returns a string containing the time zone code of the receiver.
+<br><br><br>
+
+</UL>
+<h3>Utility</h3>
+<UL>
+
+<b>secondsSince(aDate)</b>
+<p>
+Returns a number of seconds of between aDate and the receiver.
+<br><br><br>
+
+<b>dateAfterSeconds(secondsNumber)</b>
+<p>
+Returns a new date that is secondsNumber seconds after the receiver.
+<br><br><br>
+
+<b>secondsToRun(&lt;aMessage&gt;)</b>
+<p>
+Returns a number containing the number of seconds taken to execute aMessage.
+<br><br><br>
+
+</UL>
+<h3>Conversion To</h3>
+<UL>
+<br>
+
+<b>setFormat(formatString)</b>
+<p>
+Sets the format used for the asString and print methods. Returns self. The formatString should be formatted according to ANSI C date formating rules.
+<p>
+<PRE>
+%a abbreviated weekday name (Sun, Mon, etc.)
+%A full weekday name (Sunday, Monday, etc.) 
+%b abbreviated month name (Jan, Feb, etc.) 
+%B full month name (January, February, etc.) 
+%c full date and time string 
+%d day of the month as two-digit decimal integer (01-31) 
+%H hour as two-digit 24-hour clock decimal integer (00-23) 
+%I hour as two-digit 12-hour clock decimal integer (01-12) 
+%m month as a two-digit decimal integer (01-12)
+%M minute as a two-digit decimal integer (00-59) 
+%p either "AM" or "PM" 
+%S second as a two-digit decimal integer (00-59) 
+%U number of week in the year as two-digit decimal integer (00-52) with Sunday considered as first day of the week 
+%w weekday as one-digit decimal integer (0-6) with Sunday as 0 
+%W number of week in the year as two-digit decimal integer (00-52) with Monday considered as first day of the week 
+%x full date string (no time); in the C locale, this is equivalent to "%m/%d/%y". 
+%X full time string (no date); in the C locale, this is equivalent to "%H:%M:%S". 
+%y year without century as two-digit decimal number (00-99) 
+%Y year with century as four-digit decimal number 
+%Z time zone name (e.g. EST); null string if no time zone can be obtained 
+%% stands for '%' character in output string. 
+</PRE>
+<p>
+The default format is "%Y-%m-%d %H:%M:%S %Z".
+
+<br><br><br>
+
+<b>format</b>
+<p>
+Returns a String containing the current format setting for the receiver.
+<br><br><br>
+
+<b>asString(optionalFormatString)</b>
+<p>
+Returns a string representation of the receiver using the receivers format. If the optionalFormatString argument is present, the receiver's format is set to it first. <br><br><br>
+
+<b>asNumber</b>
+<p>
+Returns a number representation of the receiver. 
+<br><br><br>
+
+</UL>
+<h3>Conversion From</h3>
+<UL>
+<br>
+
+<b>fromNumber(aNumber)</b>
+<p>
+Sets the receiver to the date specified by aNumber(same format number as returned by Date asNumber). Returns self.
+<br><br><br>
+
+<b>fromString(aString, formatString)</b>
+<p>
+Sets the receiver to the date specified by aString as parsed according to the given formatString. See the <b>Date asString</b> method for formating rules. Returns self.
+<br><br><br>
+</UL>
+
+
+</UL>
+<h3>Math</h3>
+<UL>
+<br>
+
+<b>+ aDuration</b>
+<p>
+Return a new Date with the receiver's value plus an amount of time specified by aDuration object to the receiver. 
+<br><br><br>
+
+<b>- aDurationOrDate</b>
+<p>
+Return a new Date with the receiver's value minus an amount of time specified by aDuration to the receiver. Returns self.
+<br><br><br>
+
+<b>+= aDuration</b>
+<p>
+Add aDuration to the receiver. Returns self.
+<br><br><br>
+
+<b>-= aDuration</b>
+<p>
+Subtract aDuration from the receiver. Returns self.
+<br><br><br>
+
+<BR>
+<BR>
+<BR>
+<BR>
+
+</html>
